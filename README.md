@@ -48,7 +48,7 @@ bash scripts/test-vl.sh /path/to/image.png
 
 `WORKSPACE` defaults to `$HOME/paddleocr-gb10-work` (build/source/venvs/wheels/results). The scripts never stop running containers. Set `WORKSPACE=/data/llm-docker/paddleocr-gb10-work` if you prefer the data disk. A build needs substantial free RAM; `ninja` supports incremental recovery after interruption.
 
-**No automatic Docker Compose service is included in v0.1.0.** The real validation used a host Python venv, not a Dockerized OCR service. Docker is a planned follow-up after dual-model memory testing. Do not mistake this project for a production-ready appliance.
+The host validation above belongs to v0.1.0. The v0.2.0 Docker image and official PaddleX Serving were subsequently validated on GB10; see the Docker section below.
 
 ## Building details
 
@@ -75,7 +75,7 @@ Complete timeline, exact errors, and commands: **[Troubleshooting](docs/troubles
 
 ## Benchmark interpretation
 
-On the reference system the VL pipeline loaded in 15.670 s (cached) and processed the same page in 16.875 / 15.453 / 15.144 s. Process RSS was 3.30 GiB at peak; system `MemAvailable` dropped 9.09 GiB at most. Those figures **cannot be added** or treated as exclusive VRAM on GB10 unified memory. A Qwen3.8 vLLM instance previously used ~96,501 MiB GPU-reported memory and left ~18 GiB system-available RAM. **Co-residency has not yet been tested**, and OCR handwriting, formulas, child homework, accuracy, and concurrency remain unverified.
+On the reference system the VL pipeline loaded in 15.670 s (cached) and processed the same page in 16.875 / 15.453 / 15.144 s. Process RSS was 3.30 GiB at peak; system `MemAvailable` dropped 9.09 GiB at most. Those figures **cannot be added** or treated as exclusive VRAM on GB10 unified memory. A Qwen3.8 vLLM instance previously used ~96,501 MiB GPU-reported memory and left ~18 GiB system-available RAM. Docker OCR was later verified while Qwen3.8 remained running; simultaneous Qwen generation, OCR accuracy, and concurrency remain unverified.
 
 ## Notes on kids' homework
 
@@ -92,3 +92,7 @@ Never commit private student images, model caches, auth tokens, virtualenvs, or 
 ## Publish from macOS
 
 The existing GitHub repository can be populated using the provided macOS publisher. See [PUBLISHING.md](PUBLISHING.md). The publisher is **not** used on the GB10 host.
+
+## v0.2.0 Docker / Official Serving
+
+The `paddleocr-gb10:0.2.0` image passed Docker GPU validation on GB10. Official PaddleX Serving started and its `/layout-parsing` endpoint returned HTTP 200 for a real handwritten essay in 18.59 seconds. See [Docker README](README.docker.md) and [validation notes](docs/serving-validation-2026-11-10.md). This project adds no custom API.

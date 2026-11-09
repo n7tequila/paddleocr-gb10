@@ -1,0 +1,21 @@
+**/.git
+**/__pycache__
+**/.venv
+**/runtime
+**/build
+**/models
+**/venv
+**/logs
+**/wheels
+**/results
+**/.env
+**/*.safetensors
+**/*.pdparams
+**/*.pdmodel
+**/*.onnx
+**/*.log
+**/*.zip
+**/*.tar.gz
+# Build process writes only the approved Paddle wheel to docker/.build.
+!docker/.build
+!docker/.build/*.whl

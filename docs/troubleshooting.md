@@ -128,10 +128,18 @@ One cached local 1524×1368 newspaper image; single process, three serial runs:
 
 The output contained **31 parsed blocks**, including some empty text blocks and merged paragraphs; 27 nonempty text blocks and one image block were identified in a manual review. This is *not* a character-accuracy benchmark because the original newspaper source image was not independently ground-truthed. See [benchmarks](benchmarks.md).
 
+## 11. Docker build and official Serving
+
+The GB10 Docker image `paddleocr-gb10:0.2.0` was built using the local PaddlePaddle GPU Wheel. The build needed the same cuSPARSELt 0.8.1 metadata fix as the host: its installed WHEEL tag used `manylinux2014_sbsa` on ARM64. `docker/fix-cusparselt-wheel-tag.py` changes the installed tag to `manylinux2014_aarch64` and updates the corresponding RECORD hash and size. It does not patch NVIDIA binary libraries. The Dockerfile restores protobuf 7.36.1 and httpx 0.28.1 after installing the custom Paddle Wheel with `--no-deps`; it installs CUDA Python runtime requirements explicitly and runs `pip check`.
+
+The `--no-deps` Wheel install prevents pip from replacing the custom ARM64 GPU build, but also leaves its dependencies unresolved. During Docker preparation, `pip check` exposed missing runtime dependencies. The fix is to install the Wheel's compatible protobuf, httpx and CUDA package versions explicitly, retaining NumPy 2.3.5 and PaddleOCR/PaddleX 3.7.0/3.7.2. The Dockerfile checks `google.protobuf.internal.builder`, runs `pip check`, then imports CUDA-enabled Paddle. Avoid a general `pip install --upgrade` here: it previously raised NumPy beyond PaddleX's `<2.4` bound.
+
+The existing image then passed Docker GPU validation (compute capability 12.1). Official PaddleX Serving started; its `/layout-parsing` endpoint returned HTTP 200 for a real handwritten essay in 18.59 seconds. The validated image's `pip freeze` was captured as `docker/requirements-verified.txt`. This constraints file and updated build context packaging have **not yet been tested by a fresh build**. If a rebuild fails, keep the first pip or Docker error and compare it with the package versions in that file before changing any pinned CUDA dependency.
+
 ## Open work / not yet validated
 
 - This clean-room installation flow on a different empty GB10 host.
-- Docker service, automatic startup, multi-request throughput, concurrency.
-- Joint Qwen3.8 + OCR runtime safety. One isolated OCR run cannot establish co-residency.
+- Fresh image rebuild using the new exact dependency constraints; multi-request throughput, concurrency and long-running service stability.
+- Simultaneous Qwen3.8 generation plus OCR runtime safety and repeated-request memory metrics.
 - Chinese child handwriting, formulas, vertical arithmetic, essays, and homework question-answer linking.
 - Compatibility after future upstream API / CUDA / driver updates.

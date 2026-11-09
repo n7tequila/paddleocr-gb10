@@ -1,0 +1,22 @@
+name: paddleocr-gb10
+services:
+  paddleocr:
+    image: ${PADDLEOCR_IMAGE:-paddleocr-gb10:0.2.0}
+    container_name: paddleocr-gb10
+    restart: unless-stopped
+    gpus: all
+    init: true
+    shm_size: '1gb'
+    ports:
+      - '${PADDLEOCR_BIND:-127.0.0.1}:${PADDLEOCR_PUBLIC_PORT:-8004}:8080'
+    environment:
+      PADDLEOCR_PIPELINE: PaddleOCR-VL-1.6
+      PADDLEOCR_DEVICE: gpu:0
+      PADDLEOCR_HOST: 0.0.0.0
+      PADDLEOCR_PORT: '8080'
+      PADDLEX_HOME: /root/.paddlex
+      CUDA_VISIBLE_DEVICES: '0'
+    volumes:
+      - '${PADDLEX_CACHE:?Set PADDLEX_CACHE in docker/.env}:/root/.paddlex'
+    # Deliberately no memory hard limit: GB10 uses unified CPU/GPU RAM.
+    # Monitor MemAvailable and memory PSI before deploying next to a busy LLM.

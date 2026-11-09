@@ -64,14 +64,14 @@ docs/                  排障、实测数据、开源发布说明
 
 ## 重视 Qwen3.8 共存
 
-原 GB10 上 Qwen3.8 vLLM 进程曾报告占用约 **96,501 MiB**，系统可用约 **18 GiB**。PaddleOCR-VL 单独测试中系统可用内存最大下降约 **9.09 GiB**。这两次来自不同时间，**不能证明双模型稳定共存**。儿童手写、公式识别精度也尚未实际验证。暂不推荐全部模型常驻，暂不提供自动启动 Docker 服务。
+原 GB10 上 Qwen3.8 vLLM 进程曾报告占用约 **96,501 MiB**，系统可用约 **18 GiB**。PaddleOCR-VL 单独测试中系统可用内存最大下降约 **9.09 GiB**。后续 Docker OCR 验证期间 Qwen3.8 保持运行；同时进行 Qwen 文本生成和 OCR、长期共存稳定性仍未验证。儿童手写、公式识别精度也尚无系统性评估。
 
 ## 未来计划
 
 - [ ] 在另一干净 GB10 环境上从零验证本仓库的构建脚本
 - [ ] GB10 + Qwen3.8 双进程内存与 GPU 峰值测试
 - [ ] 手写语文作文、数学竖式、公式的独立测试集
-- [ ] 单实例 API / Docker Compose （完成验证后发布）
+- [x] 单实例官方 PaddleX Serving / Docker Compose 的启动与单次真实图片请求
 - [ ] CUDA / PaddleOCR 新版本升级与回滚流程
 
 ## Wheel 与授权
@@ -89,3 +89,7 @@ a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb
 ## 从 macOS 发布到 GitHub
 
 仓库 `n7tequila/paddleocr-gb10` 已经创建，下载配套的 ZIP 与 macOS 一键发布脚本，按 [PUBLISHING.md](PUBLISHING.md) 执行。发布不依赖 Spark 的 GPU 服务。
+
+## v0.2.0 Docker / 官方 REST API
+
+`paddleocr-gb10:0.2.0` 已在 GB10 上通过 Docker GPU 验证；官方 Serving 启动后，真实手写作文调用 `/layout-parsing` 返回 HTTP 200，耗时 18.59 秒。参见 [中文 Docker 部署](README.docker.zh-CN.md) 和 [验证记录](docs/serving-validation-2026-11-10.md)。本项目不另开发 API。
