@@ -1,0 +1,16 @@
+{
+  "hardware": "NVIDIA GB10 / ARM64 / CUDA 13.0",
+  "paddle": "3.5.0.dev20261109+6c839e963ed",
+  "paddleocr": "3.7.0",
+  "paddlex": "3.7.2",
+  "model": "PaddleOCR-VL-1.6",
+  "backend": "paddle_dynamic",
+  "image": "demo newspaper page, 1524x1368, locally cached",
+  "model_initialization_seconds": 15.67,
+  "inference_seconds": [16.875, 15.453, 15.144],
+  "peak_process_rss_mib": 3376.69,
+  "baseline_mem_available_mib": 121186.57,
+  "minimum_mem_available_mib": 111875.34,
+  "observed_mem_available_drop_mib": 9311.23,
+  "disclaimer": "Single machine; no simultaneous Qwen3.8 + OCR benchmark. Memory metrics are not additive or exclusive GPU VRAM."
+}
