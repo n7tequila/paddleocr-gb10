@@ -1,0 +1,5 @@
+index,phase,sample_id,category,started_at_utc,started_monotonic_s,ended_at_utc,duration_s,http_status,error_code,markdown_chars,pages,request_bytes,response_bytes,timed_out,status,error
+0,warmup,two-page-pdf,multi_page_pdf,2026-11-10T16:14:27.879130+00:00,271087.937712572,2026-11-10T16:14:30.203740+00:00,2.32464,200,0,129,2,74174,3248,False,success,
+1,measure,two-page-pdf,multi_page_pdf,2026-11-10T16:14:32.011906+00:00,271092.070489402,2026-11-10T16:14:36.579240+00:00,4.567363,200,0,129,2,74174,3248,False,success,
+2,measure,two-page-pdf,multi_page_pdf,2026-11-10T16:14:38.290257+00:00,271098.348839325,2026-11-10T16:14:40.513132+00:00,2.222898,200,0,129,2,74174,3248,False,success,
+3,measure,two-page-pdf,multi_page_pdf,2026-11-10T16:14:42.305572+00:00,271102.364153857,2026-11-10T16:14:44.609459+00:00,2.303915,200,0,129,2,74174,3248,False,success,

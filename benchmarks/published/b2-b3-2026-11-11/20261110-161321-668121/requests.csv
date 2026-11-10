@@ -1,0 +1,5 @@
+index,phase,sample_id,category,started_at_utc,started_monotonic_s,ended_at_utc,duration_s,http_status,error_code,markdown_chars,pages,request_bytes,response_bytes,timed_out,status,error
+0,warmup,math-expression,math_expression,2026-11-10T16:13:25.185499+00:00,271025.244082331,2026-11-10T16:13:26.496556+00:00,1.311089,200,0,85,1,15842,1595,False,success,
+1,measure,math-expression,math_expression,2026-11-10T16:13:28.312661+00:00,271028.37124223,2026-11-10T16:13:29.563926+00:00,1.251304,200,0,85,1,15842,1595,False,success,
+2,measure,math-expression,math_expression,2026-11-10T16:13:31.320261+00:00,271031.378846047,2026-11-10T16:13:33.687205+00:00,2.366964,200,0,85,1,15842,1595,False,success,
+3,measure,math-expression,math_expression,2026-11-10T16:13:35.338137+00:00,271035.396719059,2026-11-10T16:13:36.593734+00:00,1.255633,200,0,85,1,15842,1595,False,success,

@@ -1,0 +1,5 @@
+index,phase,sample_id,category,started_at_utc,started_monotonic_s,ended_at_utc,duration_s,http_status,error_code,markdown_chars,pages,request_bytes,response_bytes,timed_out,status,error
+0,warmup,one-page-pdf,single_page_pdf,2026-11-10T16:24:10.532655+00:00,271670.591238459,2026-11-10T16:24:11.721535+00:00,1.188895,200,0,67,1,38138,1713,False,success,
+1,measure,one-page-pdf,single_page_pdf,2026-11-10T16:24:13.542175+00:00,271673.600759864,2026-11-10T16:24:14.735271+00:00,1.193124,200,0,67,1,38138,1713,False,success,
+2,measure,one-page-pdf,single_page_pdf,2026-11-10T16:24:16.552133+00:00,271676.610715472,2026-11-10T16:24:17.737170+00:00,1.185065,200,0,67,1,38138,1713,False,success,
+3,measure,one-page-pdf,single_page_pdf,2026-11-10T16:24:19.564617+00:00,271679.623201824,2026-11-10T16:24:20.777094+00:00,1.212506,200,0,67,1,38138,1713,False,success,

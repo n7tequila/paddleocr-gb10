@@ -1,0 +1,528 @@
+{
+  "status": "success",
+  "dataset_manifest_sha256": "acb54523d71014928389676ede159f1353c74b72d4cfcaed3ba2cc26a13f332e",
+  "total_warmups": 8,
+  "total_measured_attempts": 24,
+  "total_measured_successes": 24,
+  "minimum_mem_available_gib": 13.648,
+  "per_sample": [
+    {
+      "id": "english-print",
+      "run_id": "20261110-161221-723214",
+      "status": "success",
+      "sample": {
+        "id": "english-print",
+        "file_type": "png",
+        "width": 900,
+        "height": 360,
+        "bytes": 22672,
+        "pages": 1,
+        "category": "english_print",
+        "sha256": "1fcedd285d3c5cb8c73a0d885802922428a50799214fbf26d3d4a70be84176d2"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 0.7750940000000001,
+        "median_p50_s": 0.77071,
+        "p90_s": 0.7921828,
+        "p95_s": 0.7948669,
+        "min_s": 0.757021,
+        "max_s": 0.797551,
+        "stddev_s": 0.016834187773694324,
+        "pages": 3,
+        "pages_per_s": 0.6232037195336828,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        84,
+        84,
+        84
+      ],
+      "http_e2e_s": [
+        0.757021,
+        0.77071,
+        0.797551
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.817,
+        "mem_available_min_gib": 13.791,
+        "mem_available_observed_drop_gib": 0.026,
+        "swap_start_gib": 2.593,
+        "swap_end_gib": 2.593,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 93.75,
+        "gpu_temp_max_c": 62.0,
+        "gpu_power_max_w": 38.1,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.863GiB / 121.6GiB",
+        "docker_memory_last": "3.862GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3076.62,
+        "resource_rows": 10
+      }
+    },
+    {
+      "id": "chinese-print",
+      "run_id": "20261110-161234-886841",
+      "status": "success",
+      "sample": {
+        "id": "chinese-print",
+        "file_type": "png",
+        "width": 1000,
+        "height": 450,
+        "bytes": 29499,
+        "pages": 1,
+        "category": "chinese_print",
+        "sha256": "1a1fe969022541d36ec3a1515cf88398de552631dd291f36e5737d2e44eadbd5"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 1.5831586666666668,
+        "median_p50_s": 1.213133,
+        "p90_s": 2.1090978000000002,
+        "p95_s": 2.2210934,
+        "min_s": 1.203254,
+        "max_s": 2.333089,
+        "stddev_s": 0.5302961608386604,
+        "pages": 3,
+        "pages_per_s": 0.36457133847529616,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        34,
+        34,
+        34
+      ],
+      "http_e2e_s": [
+        2.333089,
+        1.213133,
+        1.203254
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.784,
+        "mem_available_min_gib": 13.757,
+        "mem_available_observed_drop_gib": 0.027,
+        "swap_start_gib": 2.593,
+        "swap_end_gib": 2.593,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 94.75,
+        "gpu_temp_max_c": 63.0,
+        "gpu_power_max_w": 42.51,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.862GiB / 121.6GiB",
+        "docker_memory_last": "3.864GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3078.07,
+        "resource_rows": 15
+      }
+    },
+    {
+      "id": "paragraph-layout",
+      "run_id": "20261110-161259-829816",
+      "status": "success",
+      "sample": {
+        "id": "paragraph-layout",
+        "file_type": "png",
+        "width": 1100,
+        "height": 650,
+        "bytes": 30532,
+        "pages": 1,
+        "category": "multi_paragraph",
+        "sha256": "7593253a1e5861411292934434681217e359a8704e0b46aa8e1fb2206b9fcc8b"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 2.8048436666666667,
+        "median_p50_s": 2.333422,
+        "p90_s": 3.4775083999999996,
+        "p95_s": 3.6205191999999995,
+        "min_s": 2.317579,
+        "max_s": 3.76353,
+        "stddev_s": 0.6779244620911355,
+        "pages": 3,
+        "pages_per_s": 0.25925587961130314,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        182,
+        182,
+        182
+      ],
+      "http_e2e_s": [
+        2.333422,
+        3.76353,
+        2.317579
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.793,
+        "mem_available_min_gib": 13.756,
+        "mem_available_observed_drop_gib": 0.037,
+        "swap_start_gib": 2.593,
+        "swap_end_gib": 2.593,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 94.58823529411765,
+        "gpu_temp_max_c": 64.0,
+        "gpu_power_max_w": 44.19,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.864GiB / 121.6GiB",
+        "docker_memory_last": "3.867GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3080.89,
+        "resource_rows": 19
+      }
+    },
+    {
+      "id": "math-expression",
+      "run_id": "20261110-161321-668121",
+      "status": "success",
+      "sample": {
+        "id": "math-expression",
+        "file_type": "png",
+        "width": 900,
+        "height": 360,
+        "bytes": 11850,
+        "pages": 1,
+        "category": "math_expression",
+        "sha256": "1e622a5c60008bf2a0a38e99103cb3aec7d7c94993d4a690d68a556844ef8dd9"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 1.6246336666666665,
+        "median_p50_s": 1.255633,
+        "p90_s": 2.1446978,
+        "p95_s": 2.2558309,
+        "min_s": 1.251304,
+        "max_s": 2.366964,
+        "stddev_s": 0.5249097877415593,
+        "pages": 3,
+        "pages_per_s": 0.3622702828437197,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        85,
+        85,
+        85
+      ],
+      "http_e2e_s": [
+        1.251304,
+        2.366964,
+        1.255633
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.773,
+        "mem_available_min_gib": 13.741,
+        "mem_available_observed_drop_gib": 0.032,
+        "swap_start_gib": 2.593,
+        "swap_end_gib": 2.593,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 94.16666666666667,
+        "gpu_temp_max_c": 63.0,
+        "gpu_power_max_w": 42.55,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.866GiB / 121.6GiB",
+        "docker_memory_last": "3.867GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3081.53,
+        "resource_rows": 15
+      }
+    },
+    {
+      "id": "small-resolution",
+      "run_id": "20261110-161345-967613",
+      "status": "success",
+      "sample": {
+        "id": "small-resolution",
+        "file_type": "png",
+        "width": 640,
+        "height": 240,
+        "bytes": 8839,
+        "pages": 1,
+        "category": "resolution_small",
+        "sha256": "90b884995486cbf98f0808c6994da4dcb9ba581a1e00eaaa8327daee4f18d337"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 0.63469,
+        "median_p50_s": 0.634059,
+        "p90_s": 0.636299,
+        "p95_s": 0.636579,
+        "min_s": 0.633152,
+        "max_s": 0.636859,
+        "stddev_s": 0.0015777796635356067,
+        "pages": 3,
+        "pages_per_s": 0.6450462995146948,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        38,
+        38,
+        38
+      ],
+      "http_e2e_s": [
+        0.634059,
+        0.636859,
+        0.633152
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.801,
+        "mem_available_min_gib": 13.775,
+        "mem_available_observed_drop_gib": 0.026,
+        "swap_start_gib": 2.592,
+        "swap_end_gib": 2.592,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 93.0,
+        "gpu_temp_max_c": 63.0,
+        "gpu_power_max_w": 38.29,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.867GiB / 121.6GiB",
+        "docker_memory_last": "3.868GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3081.52,
+        "resource_rows": 10
+      }
+    },
+    {
+      "id": "large-resolution",
+      "run_id": "20261110-161359-549238",
+      "status": "success",
+      "sample": {
+        "id": "large-resolution",
+        "file_type": "png",
+        "width": 1600,
+        "height": 900,
+        "bytes": 31617,
+        "pages": 1,
+        "category": "resolution_large",
+        "sha256": "470d4af103f0712c75746f0760a8866853d30eaa19c5722d952cf955ac427b50"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 1.209914,
+        "median_p50_s": 0.834547,
+        "p90_s": 1.7426086,
+        "p95_s": 1.8561163,
+        "min_s": 0.825571,
+        "max_s": 1.969624,
+        "stddev_s": 0.5372085909085967,
+        "pages": 3,
+        "pages_per_s": 0.5015643476849894,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        61,
+        61,
+        61
+      ],
+      "http_e2e_s": [
+        0.825571,
+        0.834547,
+        1.969624
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.779,
+        "mem_available_min_gib": 13.716,
+        "mem_available_observed_drop_gib": 0.063,
+        "swap_start_gib": 2.592,
+        "swap_end_gib": 2.592,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 96.0,
+        "gpu_temp_max_c": 63.0,
+        "gpu_power_max_w": 34.67,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.867GiB / 121.6GiB",
+        "docker_memory_last": "3.874GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3088.63,
+        "resource_rows": 14
+      }
+    },
+    {
+      "id": "one-page-pdf",
+      "run_id": "20261110-162406-966854",
+      "status": "success",
+      "sample": {
+        "id": "one-page-pdf",
+        "file_type": "pdf",
+        "width": 850,
+        "height": 1100,
+        "bytes": 28572,
+        "pages": 1,
+        "category": "single_page_pdf",
+        "sha256": "61d5c441bebf7c911ddd0d3fe6a9be62864ae88c2e65b57ca50af7c972477b04"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 1.1968983333333334,
+        "median_p50_s": 1.193124,
+        "p90_s": 1.2086296,
+        "p95_s": 1.2105678000000002,
+        "min_s": 1.185065,
+        "max_s": 1.212506,
+        "stddev_s": 0.011516258487701462,
+        "pages": 3,
+        "pages_per_s": 0.4146539846012,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        67,
+        67,
+        67
+      ],
+      "http_e2e_s": [
+        1.193124,
+        1.185065,
+        1.212506
+      ],
+      "actual_pages": [
+        1,
+        1,
+        1
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.766,
+        "mem_available_min_gib": 13.708,
+        "mem_available_observed_drop_gib": 0.058,
+        "swap_start_gib": 2.592,
+        "swap_end_gib": 2.592,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 95.72,
+        "gpu_temp_max_c": 65.0,
+        "gpu_power_max_w": 44.24,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.914GiB / 121.6GiB",
+        "docker_memory_last": "3.897GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3130.41,
+        "resource_rows": 26
+      }
+    },
+    {
+      "id": "two-page-pdf",
+      "run_id": "20261110-161424-328184",
+      "status": "success",
+      "sample": {
+        "id": "two-page-pdf",
+        "file_type": "pdf",
+        "width": 850,
+        "height": 1100,
+        "bytes": 55598,
+        "pages": 2,
+        "category": "multi_page_pdf",
+        "sha256": "78aa0fa32ce8843bfef17fa68e9575f64df9c3a97f6b69c7bca157b93a042108"
+      },
+      "measurements": {
+        "attempted": 3,
+        "success": 3,
+        "failed": 0,
+        "timeout": 0,
+        "success_rate": 1.0,
+        "mean_s": 3.031392,
+        "median_p50_s": 2.303915,
+        "p90_s": 4.1146734,
+        "p95_s": 4.341018200000001,
+        "min_s": 2.222898,
+        "max_s": 4.567363,
+        "stddev_s": 1.0865990131914658,
+        "pages": 6,
+        "pages_per_s": 0.47628197317041676,
+        "p95_descriptive_only": true
+      },
+      "markdown_chars": [
+        129,
+        129,
+        129
+      ],
+      "http_e2e_s": [
+        4.567363,
+        2.222898,
+        2.303915
+      ],
+      "actual_pages": [
+        2,
+        2,
+        2
+      ],
+      "resource": {
+        "mem_available_start_gib": 13.791,
+        "mem_available_min_gib": 13.648,
+        "mem_available_observed_drop_gib": 0.143,
+        "swap_start_gib": 2.592,
+        "swap_end_gib": 2.592,
+        "psi_some_max_avg10": 0.0,
+        "psi_full_max_avg10": 0.0,
+        "gpu_util_mean_pct": 96.0,
+        "gpu_temp_max_c": 65.0,
+        "gpu_power_max_w": 44.56,
+        "gpu_memory_mib": null,
+        "docker_memory_first": "3.874GiB / 121.6GiB",
+        "docker_memory_last": "3.914GiB / 121.6GiB",
+        "paddleocr_rss_max_mib": 3189.27,
+        "resource_rows": 20
+      }
+    }
+  ],
+  "source_revision_counts": {
+    "benchmarks/benchmark.py": 2,
+    "benchmarks/monitor.py": 2,
+    "benchmarks/datasets/manifest.json": 2
+  },
+  "latency_pooling": "none; each sample/category is reported separately"
+}

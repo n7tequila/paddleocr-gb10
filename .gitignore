@@ -65,3 +65,5 @@ secrets.json
 *.pt
 *.pth
 *.bin
+
+benchmarks/reports/

@@ -1,0 +1,75 @@
+{
+  "timestamp_utc": "2026-11-10T16:24:07.375677+00:00",
+  "cpu_architecture": "aarch64",
+  "gpu_name_driver": "NVIDIA GB10, 580.178.04",
+  "cuda_driver_report": "Wed Nov 11 00:24:07 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GB10                    On  |   0000000F:01:00.0 Off |                  N/A |\n| N/A   62C    P0             34W /  N/A  | Not Supported          |     96%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+-----",
+  "packages": {
+    "paddlepaddle-gpu": "3.5.0.dev20261109+6c839e963ed",
+    "paddleocr": "3.7.0",
+    "paddlex": "3.7.2"
+  },
+  "docker_image_id": "sha256:60bcde155a57ed4630fb88ef9757b3096eeac40a2bb7b2cd24ab6037984362d3",
+  "docker_repo_digests": [
+    "paddleocr-gb10@sha256:60bcde155a57ed4630fb88ef9757b3096eeac40a2bb7b2cd24ab6037984362d3",
+    "ghcr.io/n7tequila/paddleocr-gb10@sha256:60bcde155a57ed4630fb88ef9757b3096eeac40a2bb7b2cd24ab6037984362d3"
+  ],
+  "git_commit": "9a21c5596088e2b5bb13360649259edcb3459140",
+  "api_url": "http://127.0.0.1:8080",
+  "git_worktree_dirty": true,
+  "benchmark_source_sha256": {
+    "benchmarks/benchmark.py": "7c675836cd23b1770d3dfc35ca134e84a35338d5e0e8ca91d2e341304b080548",
+    "benchmarks/monitor.py": "5e0278ba72b45532e49f34b0b0db0c266e6954f0fce2bbe1f05fd554486df2a8",
+    "benchmarks/datasets/manifest.json": "acb54523d71014928389676ede159f1353c74b72d4cfcaed3ba2cc26a13f332e"
+  },
+  "co_resident_containers": [
+    "paddleocr-gb10 Up 2 hours (healthy)",
+    "vllm-educhat Up 2 hours (healthy)",
+    "vllm-omniedu Up 3 hours (healthy)"
+  ],
+  "coexistence_note": "Qwen-related containers may be present; generation activity and cache state were not measured. This is not a verified OCR-only baseline.",
+  "parameters": {
+    "api_url": "http://127.0.0.1:8080",
+    "images": null,
+    "requests": 3,
+    "warmup": 1,
+    "concurrency": 1,
+    "allow_concurrency": false,
+    "timeout": 300.0,
+    "output_dir": "benchmarks/reports/b2-20261110-161209",
+    "scenario": "documents",
+    "sample_id": [
+      "one-page-pdf"
+    ],
+    "sample_interval": 0.5
+  },
+  "dataset_sha256": {
+    "one-page-pdf": "61d5c441bebf7c911ddd0d3fe6a9be62864ae88c2e65b57ca50af7c972477b04"
+  },
+  "dataset_samples": [
+    {
+      "id": "one-page-pdf",
+      "file_type": "pdf",
+      "width": 850,
+      "height": 1100,
+      "bytes": 28572,
+      "pages": 1,
+      "category": "single_page_pdf",
+      "sha256": "61d5c441bebf7c911ddd0d3fe6a9be62864ae88c2e65b57ca50af7c972477b04"
+    }
+  ],
+  "memory_note": "GB10 unified memory: MemAvailable, Docker memory, process RSS, and NVIDIA memory can overlap; never add them.",
+  "scenario": {
+    "name": "documents",
+    "description": "Eight distinct synthetic document categories; run manually",
+    "sample_ids": [
+      "english-print",
+      "chinese-print",
+      "paragraph-layout",
+      "math-expression",
+      "small-resolution",
+      "large-resolution",
+      "one-page-pdf",
+      "two-page-pdf"
+    ]
+  }
+}

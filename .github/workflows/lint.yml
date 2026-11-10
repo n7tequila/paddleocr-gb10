@@ -9,5 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Static checks
         run: bash tests/run-tests.sh static
-      - name: Unit tests (no GPU or network)
+      - name: Benchmark Python syntax
+        run: python3 -m py_compile benchmarks/benchmark.py benchmarks/monitor.py benchmarks/aggregate.py benchmarks/coexist.py benchmarks/datasets/generate.py
+      - name: Unit tests (no GPU or network; includes benchmark)
         run: python3 -m unittest discover -s tests -p 'test_*.py'

@@ -1,5 +1,7 @@
 # PaddleOCR on NVIDIA GB10 (ARM64 / CUDA 13.0)
 
+Performance Benchmark: [methodology](docs/benchmark.md), [tool](benchmarks/README.md), and [B2/B3 synthetic acceptance report](benchmarks/published/b2-b3-2026-11-11/report.md).
+
 [中文文档](README.zh-CN.md) · [Troubleshooting](docs/troubleshooting.md) · [Reproduction](docs/reproduction.md) · [Benchmarks](docs/benchmarks.md)
 
 Automated L1-L6 checks: [test guide](docs/testing.md). Start with `bash tests/run-tests.sh static`; see the guide before running GPU or OCR inference layers.

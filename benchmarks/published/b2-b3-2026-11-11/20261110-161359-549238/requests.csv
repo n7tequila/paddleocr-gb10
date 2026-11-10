@@ -1,0 +1,5 @@
+index,phase,sample_id,category,started_at_utc,started_monotonic_s,ended_at_utc,duration_s,http_status,error_code,markdown_chars,pages,request_bytes,response_bytes,timed_out,status,error
+0,warmup,large-resolution,resolution_large,2026-11-10T16:14:03.105380+00:00,271063.163963106,2026-11-10T16:14:05.137801+00:00,2.03244,200,0,61,1,42198,1508,False,success,
+1,measure,large-resolution,resolution_large,2026-11-10T16:14:07.261354+00:00,271067.319936758,2026-11-10T16:14:08.086913+00:00,0.825571,200,0,61,1,42198,1508,False,success,
+2,measure,large-resolution,resolution_large,2026-11-10T16:14:09.268287+00:00,271069.32687001,2026-11-10T16:14:10.102809+00:00,0.834547,200,0,61,1,42198,1508,False,success,
+3,measure,large-resolution,resolution_large,2026-11-10T16:14:11.273016+00:00,271071.331599135,2026-11-10T16:14:13.242617+00:00,1.969624,200,0,61,1,42198,1508,False,success,

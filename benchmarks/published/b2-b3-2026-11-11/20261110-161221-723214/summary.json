@@ -1,0 +1,57 @@
+{
+  "status": "success",
+  "reason": null,
+  "client_http_end_to_end": true,
+  "requested_measurements": 3,
+  "completed_measurements": 3,
+  "warmup_attempted": 1,
+  "overall": {
+    "attempted": 3,
+    "success": 3,
+    "failed": 0,
+    "timeout": 0,
+    "success_rate": 1.0,
+    "mean_s": 0.7750940000000001,
+    "median_p50_s": 0.77071,
+    "p90_s": 0.7921828,
+    "p95_s": 0.7948669,
+    "min_s": 0.757021,
+    "max_s": 0.797551,
+    "stddev_s": 0.016834187773694324,
+    "pages": 3,
+    "pages_per_s": 0.6232037195336828,
+    "p95_descriptive_only": true
+  },
+  "by_category": {
+    "english_print": {
+      "attempted": 3,
+      "success": 3,
+      "failed": 0,
+      "timeout": 0,
+      "success_rate": 1.0,
+      "mean_s": 0.7750940000000001,
+      "median_p50_s": 0.77071,
+      "p90_s": 0.7921828,
+      "p95_s": 0.7948669,
+      "min_s": 0.757021,
+      "max_s": 0.797551,
+      "stddev_s": 0.016834187773694324,
+      "pages": 3,
+      "pages_per_s": 0.6232037195336828,
+      "p95_descriptive_only": true
+    }
+  },
+  "measurement_window_s": 4.81383519701194,
+  "minimum_mem_available_gib": 13.791,
+  "resource_overview": {
+    "gpu_util_mean_pct": 93.75,
+    "gpu_power_max_w": 38.1,
+    "gpu_temp_max_c": 62.0,
+    "psi_some_max_avg10": 0.0,
+    "psi_full_max_avg10": 0.0,
+    "paddleocr_process_rss_max_mib": 3076.62
+  },
+  "protection_triggered": false,
+  "unrun_measurements": 0,
+  "p95_note": "P95 is descriptive for fewer than 100 successes; it is not a stable tail latency estimate."
+}

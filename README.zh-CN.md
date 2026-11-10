@@ -1,5 +1,7 @@
 # paddleocr-gb10：在 NVIDIA GB10 / ARM64 上运行 PaddleOCR-VL
 
+性能评测：[中文方法](docs/benchmark.zh-CN.md)、[工具说明](benchmarks/README.md)及[B2/B3 合成数据验收报告](benchmarks/published/b2-b3-2026-11-11/report.md)。
+
 [English README](README.md) · [完整排障记录](docs/troubleshooting.md) · [构建说明](docs/reproduction.md) · [基准测试](docs/benchmarks.md)
 
 L1–L6 自动化测试见[中文测试指南](docs/testing.zh-CN.md)。先运行 `bash tests/run-tests.sh static`；GPU 和真实 OCR 推理层的资源要求见指南。
