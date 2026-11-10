@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--url', default='http://127.0.0.1:8004/layout-parsing')
+    p.add_argument('--url', default='http://127.0.0.1:8080/layout-parsing')
     p.add_argument('--image', required=True)
     p.add_argument('--output', default='api-smoke-result.json')
     args = p.parse_args()

@@ -19,25 +19,25 @@ docker pull --platform linux/arm64 \
 
 **2026-11-10 发布核查：**匿名 GHCR 令牌请求和清单读取均返回 HTTP 200；OCI 索引列出 `linux/arm64`。这验证了匿名元数据访问，尚未完整拉取远端镜像或对远端镜像重新进行 GPU 测试。
 
-镜像可拉取后，使用自己的目录持久化模型缓存，默认只监听宿主机 `127.0.0.1:8004`：
+镜像可拉取后，使用自己的目录持久化模型缓存，默认只监听宿主机 `127.0.0.1:8080`：
 
 ```bash
 mkdir -p "$HOME/paddleocr-gb10-model-cache"
 docker run --rm --gpus all --name paddleocr-gb10 \
-  -p 127.0.0.1:8004:8080 \
+  -p 127.0.0.1:8080:8080 \
   -v "$HOME/paddleocr-gb10-model-cache:/root/.paddlex" \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-Compose 用法：仅在 `docker/.env` 不存在时复制 [docker/.env.example](docker/.env.example)；如已有旧配置，请检查 `PADDLEOCR_IMAGE` 并设为 GHCR 地址。按需将 `PADDLEX_CACHE` 改为自己的绝对缓存目录，或使用默认的持久化 `docker/model-cache`；然后运行 `docker compose --env-file docker/.env -f docker/compose.yaml up -d`。GHCR 路径无需本地 Wheel 或 Docker 构建上下文。设置 `PADDLEOCR_PUBLIC_PORT` 可更改宿主机端口。Compose 使用 `gpus: all`、`linux/arm64`，默认仅绑定 `127.0.0.1:8004`。本地构建为可选流程，详见[中文 Docker 文档](README.docker.zh-CN.md)。
+Compose 用法：仅在 `docker/.env` 不存在时复制 [docker/.env.example](docker/.env.example)；如已有旧配置，请检查 `PADDLEOCR_IMAGE` 并设为 GHCR 地址。按需将 `PADDLEX_CACHE` 改为自己的绝对缓存目录，或使用默认的持久化 `docker/model-cache`；然后运行 `docker compose --env-file docker/.env -f docker/compose.yaml up -d`。GHCR 路径无需本地 Wheel 或 Docker 构建上下文。设置 `PADDLEOCR_PUBLIC_PORT` 可更改宿主机端口。Compose 使用 `gpus: all`、`linux/arm64`，默认仅绑定 `127.0.0.1:8080`。本地构建为可选流程，详见[中文 Docker 文档](README.docker.zh-CN.md)。
 
 ## PaddleX 官方 REST API
 
-服务端点是 `POST http://127.0.0.1:8004/layout-parsing`。以下命令使用仓库内的标准库客户端，把本地图片编码为 Base64 后按 [PaddleX 3.7 官方协议](https://paddlepaddle.github.io/PaddleX/3.7/en/pipeline_usage/tutorials/ocr_pipelines/PaddleOCR-VL.html#43-client-side-invocation)发送：
+服务端点是 `POST http://127.0.0.1:8080/layout-parsing`。以下命令使用仓库内的标准库客户端，把本地图片编码为 Base64 后按 [PaddleX 3.7 官方协议](https://paddlepaddle.github.io/PaddleX/3.7/en/pipeline_usage/tutorials/ocr_pipelines/PaddleOCR-VL.html#43-client-side-invocation)发送：
 
 ```bash
 python3 docker/test-official-api.py \
-  --url http://127.0.0.1:8004/layout-parsing \
+  --url http://127.0.0.1:8080/layout-parsing \
   --image /path/to/image.png \
   --output /tmp/paddleocr-response.json
 ```
@@ -55,7 +55,7 @@ PY
 curl --fail-with-body --connect-timeout 10 --max-time 300 \
   -H 'Content-Type: application/json' \
   --data-binary @/tmp/paddleocr-request.json \
-  http://127.0.0.1:8004/layout-parsing
+  http://127.0.0.1:8080/layout-parsing
 ```
 
 启动后用 `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` 和同参数的 `ps` 查看状态。首次启动可能下载模型到持久化的 `/root/.paddlex` 缓存；以 `/layout-parsing` 成功响应确认就绪，不依赖未记录的健康检查端点。

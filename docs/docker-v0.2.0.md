@@ -27,7 +27,7 @@ docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 padd
 bash docker/check-api.sh /path/to/image.png
 ```
 
-The default host address is `127.0.0.1:8004`; set `PADDLEOCR_PUBLIC_PORT` in `docker/.env` if it is busy. If an older `docker/.env` exists, set its `PADDLEOCR_IMAGE` to the GHCR tag. `PADDLEX_CACHE` defaults to persistent `docker/model-cache`, mapped to `/root/.paddlex`; model weights are downloaded on first start. This path pulls GHCR directly and requires no Wheel download or image build.
+The default host address is `127.0.0.1:8080`; set `PADDLEOCR_PUBLIC_PORT` in `docker/.env` if it is busy. If an older `docker/.env` exists, set its `PADDLEOCR_IMAGE` to the GHCR tag. `PADDLEX_CACHE` defaults to persistent `docker/model-cache`, mapped to `/root/.paddlex`; model weights are downloaded on first start. Compose marks the container healthy after PaddleX starts listening on its internal port, with a 10-minute startup grace period for model loading. This TCP check does not validate OCR inference; use the `/layout-parsing` request below for that. This path pulls GHCR directly and requires no Wheel download or image build.
 
 ## Optional local build on FusionXpark
 
@@ -53,7 +53,7 @@ Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity i
 ## Limitations and decisions
 
 - **Never modify Qwen** to accommodate Docker packaging; it is an independent container.
-- Host port binds to `127.0.0.1:8004` by default. To allow LAN clients, explicitly set `PADDLEOCR_BIND=0.0.0.0`, configure firewall and add a reverse proxy/authentication. Official Serving does not constitute an authenticated internet-facing gateway.
+- Host port binds to `127.0.0.1:8080` by default. To allow LAN clients, explicitly set `PADDLEOCR_BIND=0.0.0.0`, configure firewall and add a reverse proxy/authentication. Official Serving does not constitute an authenticated internet-facing gateway.
 - `gpus: all` requires NVIDIA Container Toolkit / compatible Docker Compose.
 - The image uses `nvidia/cuda:13.0.2-cudnn-runtime-ubuntu24.04`. The existing image passed GB10 GPU validation; the new dependency constraints need a fresh build test. The base image is pinned by tag, not digest, and APT packages may change upstream.
 - The original host and Docker build needed the `nvidia-cusparselt-cu13==0.8.1` metadata workaround (`manylinux2014_sbsa` vs `_aarch64`). The included script changes installed WHEEL metadata and RECORD only; binary libraries stay untouched.
@@ -65,7 +65,7 @@ Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity i
 
 ```bash
 python3 docker/test-official-api.py \
-  --url http://127.0.0.1:8004/layout-parsing \
+  --url http://127.0.0.1:8080/layout-parsing \
   --image /path/to/image.png \
   --output /tmp/paddle-response.json
 ```

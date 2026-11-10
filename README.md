@@ -26,12 +26,12 @@ After the image is available, run the official service with a persistent model c
 ```bash
 mkdir -p "$HOME/paddleocr-gb10-model-cache"
 docker run --rm --gpus all --name paddleocr-gb10 \
-  -p 127.0.0.1:8004:8080 \
+  -p 127.0.0.1:8080:8080 \
   -v "$HOME/paddleocr-gb10-model-cache:/root/.paddlex" \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-For Compose, copy [docker/.env.example](docker/.env.example) to `docker/.env` only if that file does not already exist. If an older `docker/.env` exists, check its `PADDLEOCR_IMAGE` value and set it to the GHCR tag to use the published image. Set `PADDLEX_CACHE` to your own absolute model cache path or keep its persistent `docker/model-cache` default, then run `docker compose --env-file docker/.env -f docker/compose.yaml up -d`. The GHCR path needs neither a local Wheel nor a build context. Set `PADDLEOCR_PUBLIC_PORT` to change the host port. Compose uses `gpus: all`, `linux/arm64`, and binds only `127.0.0.1:8004` by default. For an opt-in local build, see [Docker deployment](README.docker.md).
+For Compose, copy [docker/.env.example](docker/.env.example) to `docker/.env` only if that file does not already exist. If an older `docker/.env` exists, check its `PADDLEOCR_IMAGE` value and set it to the GHCR tag to use the published image. Set `PADDLEX_CACHE` to your own absolute model cache path or keep its persistent `docker/model-cache` default, then run `docker compose --env-file docker/.env -f docker/compose.yaml up -d`. The GHCR path needs neither a local Wheel nor a build context. Set `PADDLEOCR_PUBLIC_PORT` to change the host port. Compose uses `gpus: all`, `linux/arm64`, and binds only `127.0.0.1:8080` by default. For an opt-in local build, see [Docker deployment](README.docker.md).
 
 ## Official REST API
 
@@ -39,7 +39,7 @@ The endpoint is PaddleX's `POST /layout-parsing`, with JSON request and response
 
 ```bash
 python3 docker/test-official-api.py \
-  --url http://127.0.0.1:8004/layout-parsing \
+  --url http://127.0.0.1:8080/layout-parsing \
   --image /path/to/image.png \
   --output /tmp/paddleocr-response.json
 ```
@@ -57,7 +57,7 @@ PY
 curl --fail-with-body --connect-timeout 10 --max-time 300 \
   -H 'Content-Type: application/json' \
   --data-binary @/tmp/paddleocr-request.json \
-  http://127.0.0.1:8004/layout-parsing
+  http://127.0.0.1:8080/layout-parsing
 ```
 
 Check startup with `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` and `docker compose --env-file docker/.env -f docker/compose.yaml ps`. The first start may spend time downloading model weights into the mounted `/root/.paddlex` cache. Use a successful `/layout-parsing` request as the readiness check; this guide does not rely on an undocumented health endpoint.

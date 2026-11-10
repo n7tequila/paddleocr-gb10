@@ -20,7 +20,7 @@ docker compose --env-file docker/.env -f docker/compose.yaml up -d
 bash docker/check-api.sh /path/to/test-image.png
 ```
 
-The cache defaults to persistent `docker/model-cache` relative to the Compose file; set `PADDLEX_CACHE` in `docker/.env` to your own absolute path when using an existing cache. The model weights are not in the image and official tooling may download them on first use. NVIDIA Container Toolkit is required. The service uses GPU access and binds `127.0.0.1:8004` by default.
+The cache defaults to persistent `docker/model-cache` relative to the Compose file; set `PADDLEX_CACHE` in `docker/.env` to your own absolute path when using an existing cache. The model weights are not in the image and official tooling may download them on first use. NVIDIA Container Toolkit is required. The service uses GPU access and binds `127.0.0.1:8080` by default.
 
 The GHCR Compose path needs no local Wheel or Docker build context. For the optional local image path, set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` in `docker/.env`. To build locally on GB10 from the verified Wheel, run `bash docker/preflight.sh`, `bash docker/build-image.sh`, then `bash docker/check-image.sh`; see [full build steps](docs/docker-v0.2.0.md). The build helper refuses to overwrite an existing image unless explicitly requested. Set `PADDLEOCR_PUBLIC_PORT` to change the host port.
 

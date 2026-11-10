@@ -7,7 +7,7 @@
 paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 0.0.0.0 --port 8080
 ```
 
-Docker 映射为宿主机 `http://127.0.0.1:8004/layout-parsing`，请求与响应由官方 PaddleX 提供。今后的 `edu-ocr` 属于独立项目，不并入这个基础镜像。
+Docker 映射为宿主机 `http://127.0.0.1:8080/layout-parsing`，请求与响应由官方 PaddleX 提供。今后的 `edu-ocr` 属于独立项目，不并入这个基础镜像。
 
 ## 镜像状态与快速启动
 
@@ -20,7 +20,7 @@ docker compose --env-file docker/.env -f docker/compose.yaml up -d
 bash docker/check-api.sh /path/to/image.png
 ```
 
-需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。直接拉取 GHCR 镜像不需要本地 Wheel 或构建上下文。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8004`，可用 `PADDLEOCR_PUBLIC_PORT` 更改端口。本地构建为可选流程，届时将 `PADDLEOCR_IMAGE` 改为 `paddleocr-gb10:0.2.0`。
+需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。直接拉取 GHCR 镜像不需要本地 Wheel 或构建上下文。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8080`，可用 `PADDLEOCR_PUBLIC_PORT` 更改端口。本地构建为可选流程，届时将 `PADDLEOCR_IMAGE` 改为 `paddleocr-gb10:0.2.0`。
 
 ## 国内下载源（默认注释，不影响海外用户）
 
@@ -59,7 +59,7 @@ bash docker/check-image.sh
 test -e docker/.env || cp docker/.env.example docker/.env
 # 使用本地构建镜像时，将 docker/.env 的 PADDLEOCR_IMAGE 改成 paddleocr-gb10:0.2.0
 # 可按需将 PADDLEX_CACHE 改为自己的绝对模型缓存目录
-# 先 Ctrl+C 关闭原先宿主机上的 official-serving.sh start，释放 8004 端口。
+# 确认宿主机 8080 端口空闲；如已占用，可设置 PADDLEOCR_PUBLIC_PORT。
 docker compose --env-file docker/.env -f docker/compose.yaml config
 docker compose --env-file docker/.env -f docker/compose.yaml up -d
 docker compose --env-file docker/.env -f docker/compose.yaml logs -f --tail=80
@@ -76,7 +76,7 @@ bash docker/check-api.sh /path/to/image.png
 ## 资源和安全
 
 - 不会停止、重启或者修改运行中的 Qwen3.8 Docker。
-- 端口默认仅绑定本机 `127.0.0.1:8004`，避免未经授权的外部访问。
+- 端口默认仅绑定本机 `127.0.0.1:8080`，避免未经授权的外部访问。
 - 使用已有模型缓存挂载，不在镜像中打包模型权重。
 - GB10 为统一内存架构，不直接设置 12GiB 的硬内存限制；请注意内存指标。
 - 正式版仍需测试 Qwen3.8 同时生成时的 OCR、长时间运行和按新约束文件重建镜像。

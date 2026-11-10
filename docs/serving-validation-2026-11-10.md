@@ -2,6 +2,8 @@
 
 Observed 2026-11-10 (local GB10 time):
 
+This is a historical host test that explicitly used port 8004. Current Docker Compose examples default to 8080 on both host and container.
+
 ```text
 paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 127.0.0.1 --port 8004
 INFO: Application startup complete.

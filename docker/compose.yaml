@@ -9,7 +9,7 @@ services:
     init: true
     shm_size: '1gb'
     ports:
-      - '${PADDLEOCR_BIND:-127.0.0.1}:${PADDLEOCR_PUBLIC_PORT:-8004}:8080'
+      - '${PADDLEOCR_BIND:-127.0.0.1}:${PADDLEOCR_PUBLIC_PORT:-8080}:8080'
     environment:
       PADDLEOCR_PIPELINE: PaddleOCR-VL-1.6
       PADDLEOCR_DEVICE: gpu:0
@@ -19,5 +19,12 @@ services:
       CUDA_VISIBLE_DEVICES: '0'
     volumes:
       - '${PADDLEX_CACHE:-./model-cache}:/root/.paddlex'
+    healthcheck:
+      # Check PaddleX's listening port without running an OCR inference.
+      test: ["CMD", "python", "-c", "import os,socket; socket.create_connection(('127.0.0.1', int(os.environ.get('PADDLEOCR_PORT', '8080'))), timeout=3).close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10m
     # Deliberately no memory hard limit: GB10 uses unified CPU/GPU RAM.
     # Monitor MemAvailable and memory PSI before deploying next to a busy LLM.
