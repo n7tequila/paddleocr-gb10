@@ -10,14 +10,14 @@
 
 前提是 Ubuntu 24.04、NVIDIA GB10 / Linux ARM64、兼容 CUDA 13 的驱动，以及安装并配置好的 Docker 和 NVIDIA Container Toolkit。Docker 必须能通过 `--gpus all` 向容器提供 GPU。镜像**不含 OCR 模型权重**；首次启动可由官方工具下载模型，缓存应持久化挂载。
 
-预期的 GHCR 镜像拉取命令：
+已发布的 [v0.2.0 镜像](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0)拉取命令：
 
 ```bash
 docker pull --platform linux/arm64 \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-**2026-11-10 发布状态：**GHCR 匿名令牌请求返回 HTTP 401，Package 页面返回 HTTP 404，目前不能证明镜像已公开，也未成功验证远端架构。上面的拉取命令应在镜像公开后使用。当前可使用已验证的本地 `paddleocr-gb10:0.2.0` 镜像，或按 [Docker 构建说明](README.docker.zh-CN.md)自行构建。
+**2026-11-10 发布核查：**匿名 GHCR 令牌请求和清单读取均返回 HTTP 200；OCI 索引列出 `linux/arm64`。这验证了匿名元数据访问，尚未完整拉取远端镜像或对远端镜像重新进行 GPU 测试。
 
 镜像可拉取后，使用自己的目录持久化模型缓存，默认只监听宿主机 `127.0.0.1:8004`：
 
@@ -29,7 +29,7 @@ docker run --rm --gpus all --name paddleocr-gb10 \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-Compose 用法：复制 [docker/.env.example](docker/.env.example) 为 `docker/.env`，按需将 `PADDLEX_CACHE` 改为自己的绝对缓存目录，或使用默认的持久化 `docker/model-cache`；然后运行 `docker compose --env-file docker/.env -f docker/compose.yaml up -d`。GHCR 尚不可公开拉取时，把 `docker/.env` 中的 `PADDLEOCR_IMAGE` 改为 `paddleocr-gb10:0.2.0` 使用本地镜像。Compose 使用 `gpus: all`、`linux/arm64` 和独立桥接网络，不会停止或重建 Qwen3.8。详见[中文 Docker 文档](README.docker.zh-CN.md)。
+Compose 用法：仅在 `docker/.env` 不存在时复制 [docker/.env.example](docker/.env.example)；如已有旧配置，请检查 `PADDLEOCR_IMAGE` 并设为 GHCR 地址。按需将 `PADDLEX_CACHE` 改为自己的绝对缓存目录，或使用默认的持久化 `docker/model-cache`；然后运行 `docker compose --env-file docker/.env -f docker/compose.yaml up -d`。GHCR 路径无需本地 Wheel 或 Docker 构建上下文。设置 `PADDLEOCR_PUBLIC_PORT` 可更改宿主机端口。Compose 使用 `gpus: all`、`linux/arm64`，默认仅绑定 `127.0.0.1:8004`。本地构建为可选流程，详见[中文 Docker 文档](README.docker.zh-CN.md)。
 
 ## PaddleX 官方 REST API
 
@@ -44,16 +44,32 @@ python3 docker/test-official-api.py \
 
 请求 JSON 包含 `file`（图片 Base64）、`fileType: 1`（图片）、`visualize: false`、`useDocOrientationClassify: false` 和 `useDocUnwarping: false`。成功响应为 HTTP 200，包含 `logId`、`errorCode: 0`、`errorMsg` 与 `result.layoutParsingResults`；每页含 `prunedResult` 和 `markdown`（`text` 与可选 `images`）。这是官方参数和结构，本项目不提供额外的 `/v1/ocr/parse`。
 
+也可以直接用 curl 发送同一官方 JSON。将图片路径换成真实 PNG 或 JPEG；首次请求预留五分钟：
+
+```bash
+IMAGE=/path/to/image.png
+python3 - "$IMAGE" > /tmp/paddleocr-request.json <<'PY'
+import base64, json, pathlib, sys
+print(json.dumps({"file": base64.b64encode(pathlib.Path(sys.argv[1]).read_bytes()).decode(), "fileType": 1, "visualize": False}))
+PY
+curl --fail-with-body --connect-timeout 10 --max-time 300 \
+  -H 'Content-Type: application/json' \
+  --data-binary @/tmp/paddleocr-request.json \
+  http://127.0.0.1:8004/layout-parsing
+```
+
+启动后用 `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` 和同参数的 `ps` 查看状态。首次启动可能下载模型到持久化的 `/root/.paddlex` 缓存；以 `/layout-parsing` 成功响应确认就绪，不依赖未记录的健康检查端点。
+
 ## 社区构建 PaddlePaddle GPU Wheel
 
-[v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) 已公开提供 [CPython 3.12 / Linux aarch64 Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl) 和 [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS)。Wheel 面向 CUDA 13.0、NVIDIA GB10 / SM 12.1，是**非官方社区构建**，不保证适用于其他 ARM64 GPU。SHA256：`a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb`。
+仅在**宿主机 Python 安装**时需要 [v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) 中的 [CPython 3.12 / Linux aarch64 Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl)；[SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS) 对应文件名的 SHA256 为 `a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb`。Docker 用户无需单独下载 Wheel。此非官方社区构建仅验证于 CUDA 13.0、NVIDIA GB10 / SM 12.1，不保证适用于其他 ARM64 GPU。
 
 安装需具备兼容的 NVIDIA CUDA Python、cuDNN、cuBLAS、NCCL 等依赖。Dockerfile 记录了已验证版本，并以 `--no-deps` 安装 Wheel，避免被其他 Paddle 构建替换。`nvidia-cusparselt-cu13==0.8.1` 的 SBSA WHEEL 标签在 ARM64 上有兼容问题；仅在对应环境使用受保护的[元数据修复脚本](docker/fix-cusparselt-wheel-tag.py)，详情见[排障文档](docs/troubleshooting.md)。
 
 ## 项目版本
 
 - **v0.1.0：**GB10 上 PaddlePaddle GPU 编译和 PaddleOCR-VL 推理验证。
-- **v0.2.0：**Docker 打包和 PaddleX 官方 REST API 实测；GHCR 发布为目标，但公开访问尚未验证成功。
+- **v0.2.0：**Docker 打包和 PaddleX 官方 REST API 实测；GHCR 匿名清单可访问且索引列出 `linux/arm64`。
 
 ## 2026-11-09 已经真实验证的事实
 
@@ -133,7 +149,7 @@ docs/                  排障、实测数据、开源发布说明
 a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb
 ```
 
-**不把 Wheel、模型权重、原始儿童作业、环境变量或模型缓存提交 Git。** Wheel 将来如需分发，须单独通过 GitHub Release 发布并审查许可证与依赖。本文记录 checksum 是历史实测产物，不保证新构建会得到相同 hash。
+**不把 Wheel、模型权重、原始儿童作业、环境变量或模型缓存提交 Git。** 已发布的 Wheel 请从上方 GitHub Release 下载；本文记录 checksum 是历史实测产物，不保证新构建会得到相同 hash。
 
 参考与致谢：[sarthaknimbalkar/dgx-spark-paddlepaddle-gpu](https://github.com/sarthaknimbalkar/dgx-spark-paddlepaddle-gpu)（MIT 构建参考及 CUTLASS 补丁）；[gaozhi-ustc/paddleocr-dgx](https://github.com/gaozhi-ustc/paddleocr-dgx)（Docker 服务架构参考，未复制）；[PaddlePaddle/Paddle](https://github.com/PaddlePaddle/Paddle) 与 [PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)。本仓库**原创的脚本和文档**采用 MIT，第三方依赖保留原有授权。
 

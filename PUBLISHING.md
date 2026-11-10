@@ -4,7 +4,7 @@
 
 ## Current v0.2.0 publication status
 
-The [v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) and its GPU Wheel plus `SHA256SUMS` attachments are public. The intended GHCR address is `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`, but anonymous GHCR access returned HTTP 401 and the Package page returned HTTP 404 on 10 Nov 2026. Do not announce a successful public Docker pull until anonymous pull and `linux/arm64` manifest inspection pass. See [release details](docs/releases.md). This documentation update does not push code, change tags or modify the Release.
+The [v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) has the GPU Wheel and matching `SHA256SUMS` attachment. Anonymous requests for `ghcr.io/n7tequila/paddleocr-gb10:0.2.0` now return HTTP 200 for the token and OCI index; the index includes `linux/arm64`. A full image pull and remote GPU retest remain outstanding. If the GitHub Package page is still hidden, connect the package to this repository and confirm Public visibility in the GitHub UI. See [release details](docs/releases.md).
 
 Destination (already created): https://github.com/n7tequila/paddleocr-gb10
 

@@ -11,16 +11,16 @@ Docker 映射为宿主机 `http://127.0.0.1:8004/layout-parsing`，请求与响�
 
 ## 镜像状态与快速启动
 
-预期公开地址为 `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`。截至 2026-11-10，匿名 GHCR 令牌请求返回 HTTP 401、Package 页面返回 HTTP 404，**尚不能公开拉取，也无法核实远端 `linux/arm64` 清单**。公开后可执行：
+已发布镜像地址为 `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`。2026-11-10 匿名令牌与清单请求均返回 HTTP 200，OCI 索引列出 `linux/arm64`。尚未完整拉取远端镜像或重新做 GPU 测试。参见 [v0.2.0 Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0)。
 
 ```bash
 docker pull --platform linux/arm64 ghcr.io/n7tequila/paddleocr-gb10:0.2.0
-cp docker/.env.example docker/.env
+test -e docker/.env || cp docker/.env.example docker/.env
 docker compose --env-file docker/.env -f docker/compose.yaml up -d
 bash docker/check-api.sh /path/to/image.png
 ```
 
-需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8004`。GHCR 不可拉取期间，把 `docker/.env` 的 `PADDLEOCR_IMAGE` 改为已验证的本地 `paddleocr-gb10:0.2.0`。
+需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。直接拉取 GHCR 镜像不需要本地 Wheel 或构建上下文。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8004`，可用 `PADDLEOCR_PUBLIC_PORT` 更改端口。本地构建为可选流程，届时将 `PADDLEOCR_IMAGE` 改为 `paddleocr-gb10:0.2.0`。
 
 ## 国内下载源（默认注释，不影响海外用户）
 
@@ -56,7 +56,7 @@ bash docker/check-image.sh
 然后：
 
 ```bash
-cp docker/.env.example docker/.env
+test -e docker/.env || cp docker/.env.example docker/.env
 # 使用本地构建镜像时，将 docker/.env 的 PADDLEOCR_IMAGE 改成 paddleocr-gb10:0.2.0
 # 可按需将 PADDLEX_CACHE 改为自己的绝对模型缓存目录
 # 先 Ctrl+C 关闭原先宿主机上的 official-serving.sh start，释放 8004 端口。

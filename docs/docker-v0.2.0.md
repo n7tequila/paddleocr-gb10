@@ -2,7 +2,7 @@
 
 **Status:** The existing `paddleocr-gb10:0.2.0` image passed Docker GPU validation on GB10. Official PaddleX Serving started and `/layout-parsing` returned HTTP 200 for a real handwritten essay in 18.59 seconds. The new package constraints were captured from that image; a fresh rebuild of this updated recipe remains to be tested.
 
-**Distribution status (10 Nov 2026):** [v0.2.0 Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0), its [Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl), and [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS) are public. GHCR anonymous pull is not available: token request returned HTTP 401 and the Package page returned HTTP 404. Thus the remote image's existence, visibility and architecture are not confirmed. The Compose default points to the intended GHCR tag for use after publication; set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` for the verified local image meanwhile.
+**Distribution status (10 Nov 2026):** [v0.2.0 Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0), its [Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl), and [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS) are published. Anonymous GHCR token and OCI index requests returned HTTP 200; the index advertises `linux/arm64`. A full pull and GPU/API retest of the remote image remain outstanding. Compose pulls the GHCR tag by default without a local Wheel or Docker build context.
 
 This project does **not** implement another API or change the official PaddleX request/response. The container entrypoint is simply `paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 0.0.0.0 --port 8080`. Upstream docs: https://paddlepaddle.github.io/PaddleX/3.7/en/pipeline_usage/tutorials/ocr_pipelines/PaddleOCR-VL.html
 
@@ -15,7 +15,21 @@ This project does **not** implement another API or change the official PaddleX r
 - Successful Docker `/layout-parsing`: HTTP 200, 18.59s, real handwritten essay; Docker GPU compute capability 12.1
 - Qwen3.8 resident + OCR inference: three rounds, minimum MemAvailable 10.20GiB, memory PSI 0.00%. **Qwen generating at same time remains untested.**
 
-## Build and deployment on FusionXpark
+## Deploy the published image
+
+On a GB10 host with Docker, NVIDIA Container Toolkit and GPU access, run from the repository root:
+
+```bash
+test -e docker/.env || cp docker/.env.example docker/.env
+docker compose --env-file docker/.env -f docker/compose.yaml config
+docker compose --env-file docker/.env -f docker/compose.yaml up -d
+docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr
+bash docker/check-api.sh /path/to/image.png
+```
+
+The default host address is `127.0.0.1:8004`; set `PADDLEOCR_PUBLIC_PORT` in `docker/.env` if it is busy. If an older `docker/.env` exists, set its `PADDLEOCR_IMAGE` to the GHCR tag. `PADDLEX_CACHE` defaults to persistent `docker/model-cache`, mapped to `/root/.paddlex`; model weights are downloaded on first start. This path pulls GHCR directly and requires no Wheel download or image build.
+
+## Optional local build on FusionXpark
 
 Use a checkout of this repository **on the GB10 host** (not macOS). The build script obtains the GPU wheel from the already-working host environment and verifies its checksum:
 
@@ -32,26 +46,9 @@ The build uses `nvidia/cuda:13.0.2-cudnn-runtime-ubuntu24.04`, Ubuntu 24.04 Pyth
 
 `docker/build-image.sh` creates a temporary context containing the Dockerfile, entrypoint, constraints file, cuSPARSELt repair script and only the verified Paddle Wheel. It refuses to overwrite an existing image tag unless `REBUILD_EXISTING_IMAGE=1` is set. Rebuilding the current tag is **not required** to use the validated image and has not been done during this cleanup.
 
-Configure Compose:
+To deploy a locally built image, set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` in `docker/.env`, then use the Compose and API commands above.
 
-```bash
-cp docker/.env.example docker/.env
-# Optionally set PADDLEX_CACHE to your own absolute existing cache path.
-# The default is the persistent docker/model-cache directory.
-# For the local image, set PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0 in docker/.env.
-# Confirm the host's old PaddleX Serving on port 8004 is stopped (Ctrl+C).
-docker compose --env-file docker/.env -f docker/compose.yaml config
-docker compose --env-file docker/.env -f docker/compose.yaml up -d
-docker compose --env-file docker/.env -f docker/compose.yaml logs -f --tail=80
-```
-
-Test from another shell using one known non-sensitive local image:
-
-```bash
-bash docker/check-api.sh /path/to/image.png
-```
-
-Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity in env variable resolution. `PADDLEX_CACHE` may be a user-selected absolute directory or the default `docker/model-cache`, where official tooling can download model weights. `paddlex --install serving` is run *at Docker build time*, not on each container startup. Docker Compose now selects `linux/arm64` and the intended GHCR image by default; this changed startup path needs a live pull and service check once GHCR is public.
+Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity in env variable resolution. `PADDLEX_CACHE` may be a user-selected absolute directory or the default `docker/model-cache`, where official tooling can download model weights. `paddlex --install serving` is run *at Docker build time*, not on each container startup. Docker Compose selects `linux/arm64` and the GHCR image by default; a full pull and service check of that remote image remain outstanding.
 
 ## Limitations and decisions
 
@@ -73,7 +70,7 @@ python3 docker/test-official-api.py \
   --output /tmp/paddle-response.json
 ```
 
-The request sends JSON with Base64 `file`, `fileType: 1`, and flags `visualize`, `useDocOrientationClassify`, `useDocUnwarping`. The test asserts successful official `errorCode=0` and first-page `prunedResult` and `markdown` fields. Do not confuse `/layout-parsing` with the PP-OCR `/ocr` pipeline; only PaddleOCR-VL-1.6 is shipped.
+The request sends JSON with Base64 `file`, `fileType: 1`, and flags `visualize`, `useDocOrientationClassify`, `useDocUnwarping`. The test allows 300 seconds and asserts successful official `errorCode=0` and first-page `prunedResult` and `markdown` fields. Check Compose logs and `ps` during first-start model download, then use a successful request as the readiness check. A direct curl example is in the [main README](../README.md). Do not confuse `/layout-parsing` with the PP-OCR `/ocr` pipeline; only PaddleOCR-VL-1.6 is shipped.
 
 ## Image inspection and troubleshooting
 

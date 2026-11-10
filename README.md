@@ -12,14 +12,14 @@ This is a community-maintained GB10 adaptation, **not an official PaddlePaddle d
 
 Prerequisites: Ubuntu 24.04 on NVIDIA GB10 / Linux ARM64, CUDA 13 compatible driver, Docker with NVIDIA Container Toolkit and working `--gpus all` support. The image contains no OCR model weights. The first launch downloads models through official tooling unless they already exist in the mounted cache.
 
-The intended published image is `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`:
+The published [v0.2.0 image](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) is `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`:
 
 ```bash
 docker pull --platform linux/arm64 \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-**Publication check (10 Nov 2026):** the GHCR package was not anonymously accessible (token request HTTP 401; package page HTTP 404). The command above is ready for use **after public access is confirmed**; it has not been reported as a successful pull. Until then, use the locally validated `paddleocr-gb10:0.2.0` image or [build it](README.docker.md). The remote image architecture also remains unverified.
+**Publication check (10 Nov 2026):** an anonymous GHCR token request and manifest read returned HTTP 200. The OCI index advertises `linux/arm64`. This verifies metadata access, not a full image pull or a fresh GPU test of the remote image.
 
 After the image is available, run the official service with a persistent model cache. Choose any host directory you own; this example uses a directory under your home folder:
 
@@ -31,7 +31,7 @@ docker run --rm --gpus all --name paddleocr-gb10 \
   ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 ```
 
-For Compose, copy [docker/.env.example](docker/.env.example) to `docker/.env`, set `PADDLEX_CACHE` to your own absolute model cache path or keep its persistent `docker/model-cache` default, then run `docker compose --env-file docker/.env -f docker/compose.yaml up -d`. While GHCR is unavailable, set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` in `docker/.env` to use the existing local image. Compose uses `gpus: all`, `linux/arm64`, a bridge network, and binds only `127.0.0.1:8004` by default. It does not touch a separate Qwen3.8 container. See [Docker deployment](README.docker.md).
+For Compose, copy [docker/.env.example](docker/.env.example) to `docker/.env` only if that file does not already exist. If an older `docker/.env` exists, check its `PADDLEOCR_IMAGE` value and set it to the GHCR tag to use the published image. Set `PADDLEX_CACHE` to your own absolute model cache path or keep its persistent `docker/model-cache` default, then run `docker compose --env-file docker/.env -f docker/compose.yaml up -d`. The GHCR path needs neither a local Wheel nor a build context. Set `PADDLEOCR_PUBLIC_PORT` to change the host port. Compose uses `gpus: all`, `linux/arm64`, and binds only `127.0.0.1:8004` by default. For an opt-in local build, see [Docker deployment](README.docker.md).
 
 ## Official REST API
 
@@ -46,16 +46,32 @@ python3 docker/test-official-api.py \
 
 The script sends `file`, `fileType: 1`, `visualize: false`, `useDocOrientationClassify: false`, and `useDocUnwarping: false`. A successful official response has HTTP 200, `logId`, `errorCode: 0`, `errorMsg`, and `result.layoutParsingResults`; each page includes `prunedResult` and a `markdown` object with `text` and optional `images`. These flags are request options, not a change to the API.
 
+To send the same official JSON directly with curl, run this on the host after the service finishes loading. Replace the image path with a real PNG or JPEG; allow five minutes for a first request:
+
+```bash
+IMAGE=/path/to/image.png
+python3 - "$IMAGE" > /tmp/paddleocr-request.json <<'PY'
+import base64, json, pathlib, sys
+print(json.dumps({"file": base64.b64encode(pathlib.Path(sys.argv[1]).read_bytes()).decode(), "fileType": 1, "visualize": False}))
+PY
+curl --fail-with-body --connect-timeout 10 --max-time 300 \
+  -H 'Content-Type: application/json' \
+  --data-binary @/tmp/paddleocr-request.json \
+  http://127.0.0.1:8004/layout-parsing
+```
+
+Check startup with `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` and `docker compose --env-file docker/.env -f docker/compose.yaml ps`. The first start may spend time downloading model weights into the mounted `/root/.paddlex` cache. Use a successful `/layout-parsing` request as the readiness check; this guide does not rely on an undocumented health endpoint.
+
 ## Community PaddlePaddle GPU Wheel
 
-The [v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) publicly provides the [CPython 3.12 Linux aarch64 Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl) and [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS). This is a **nonofficial community build** for CUDA 13.0 and NVIDIA GB10 / SM 12.1, not a general ARM64 GPU Wheel. Its SHA256 is `a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb`.
+For a **host Python installation only**, the [v0.2.0 GitHub Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0) provides the [CPython 3.12 Linux aarch64 Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl) and [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS). The manifest lists that exact filename and SHA256 `a235ad6edcdf4b499ec3f86829d5302766cee1ee66de7c7786cf44660baf75bb`. This is a **nonofficial community build** for CUDA 13.0 and NVIDIA GB10 / SM 12.1, not a general ARM64 GPU Wheel. Docker users do not need to download it separately.
 
 Install it in a CPython 3.12 environment with the compatible NVIDIA CUDA Python, cuDNN, cuBLAS and NCCL packages. The Dockerfile records the verified versions and installs the Wheel with `--no-deps` to preserve this build. `nvidia-cusparselt-cu13==0.8.1` has an ARM64 SBSA WHEEL metadata mismatch; see the guarded [metadata repair](docker/fix-cusparselt-wheel-tag.py) and [troubleshooting](docs/troubleshooting.md). Do not apply the repair to unrelated platforms.
 
 ## Versions
 
 - **v0.1.0:** GB10 PaddlePaddle GPU source build and PaddleOCR-VL inference verification.
-- **v0.2.0:** Docker packaging and validated official PaddleX REST API; GHCR publication is planned but public access has not been verified.
+- **v0.2.0:** Docker packaging and validated official PaddleX REST API; anonymous GHCR manifest access and `linux/arm64` index entry verified.
 
 ## Verified result (9 Nov 2026)
 
@@ -138,7 +154,7 @@ Original GB10 build guidance and architecture patch: [sarthaknimbalkar/dgx-spark
 
 ## Security / releases
 
-Never commit private student images, model caches, auth tokens, virtualenvs, or compiled builds. Review source patches before running them. For a GitHub Release, upload the wheel as a separate asset only after verifying dependencies, licensing and provenance; see [Release guide](docs/releases.md).
+Never commit private student images, model caches, auth tokens, virtualenvs, or compiled builds. Review source patches before running them. The v0.2.0 Wheel is available as a Release asset; see [Release guide](docs/releases.md).
 
 ## Publish from macOS
 
