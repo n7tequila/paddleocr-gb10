@@ -86,7 +86,9 @@ def aggregate(root):
     for key in ('benchmarks/benchmark.py', 'benchmarks/monitor.py', 'benchmarks/datasets/manifest.json'):
         hashes = {(env.get('benchmark_source_sha256') or {}).get(key) for env in environments.values()}
         source_revision_counts[key] = len(hashes)
+    modes = {env.get('run_mode', 'UNKNOWN_SHARED') for env in environments.values()}
     result = {'status': 'success' if all(r['status'] == 'success' for r in ordered) else 'failed',
+              'run_mode': modes.pop() if len(modes) == 1 else 'MIXED_OR_UNKNOWN',
               'dataset_manifest_sha256': benchmark.sha(benchmark.DATASET / 'manifest.json'),
               'total_warmups': sum(sum(row['phase'] == 'warmup' for row in all_requests if row['run_id'] == r['run_id']) for r in ordered),
               'total_measured_attempts': sum(r['measurements']['attempted'] for r in ordered),
@@ -143,12 +145,13 @@ def aggregate(root):
                      f"{x['mem_available_observed_drop_gib']:.3f} | {x['swap_start_gib']:.3f}→{x['swap_end_gib']:.3f} | "
                      f"{x['docker_memory_first']}→{x['docker_memory_last']} |")
     lines += ['', f"Lowest observed MemAvailable: {result['minimum_mem_available_gib']:.3f} GiB. PSI some/full remained below stop thresholds; the OCR container stayed healthy.",
-              'GPU memory.used was unavailable from nvidia-smi and is N/A. System MemAvailable, Docker memory, process RSS and NVIDIA memory can overlap on GB10 unified memory and must not be added.',
+             'GPU memory.used is reported only when available; unavailable values are N/A. System MemAvailable, Docker memory, process RSS and NVIDIA memory can overlap on GB10 unified memory and must not be added.',
               'Every resource row has a UTC and monotonic timestamp. GPU and Docker values also carry their own sample timestamps; use the monotonic timestamps in requests.csv to join them. The Docker query can refresh more slowly than host memory/PSI.', '',
               '## Interpretation and limitations', '',
               '- Larger pages, different layout, Chinese text, mathematics, and two PDF pages may affect processing time. These are plausible factors, not isolated causal estimates from this small sample.',
               '- The PNG resolution comparison is between different synthetic images, so it does not isolate resolution alone. The PDFs share the first page, but were measured in separate runs.',
-              '- Qwen-related containers were present and healthy; generation activity, prefix-cache state, and background load were not controlled. This is not an OCR-only baseline or a B4 test.',
+              f"- Runtime classification: {result['run_mode']}. GPU process PIDs are mapped to Docker host process PIDs in environment.json; OCR_ONLY means no non-OCR compute PID was observed at each run's preflight.",
+              '- No Qwen workload was started and no B4 experiment was run. Preflight is a snapshot; it cannot rule out transient external workload between checks.',
               f'- Source revisions across the eight runs: {source_revision_counts}. The single-page PDF was added later; raw per-run data remains intact. Compare these results as an acceptance snapshot, not as a tightly controlled causal experiment.',
               '- Three measurements per type are insufficient for stable tail-latency claims. No accuracy ground truth, real handwriting, high concurrency, or long-duration load was tested.',
               '- The dataset contains only fictional synthetic content; no private student work or OCR response body is included.', '',

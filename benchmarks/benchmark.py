@@ -50,6 +50,7 @@ def parse_args(argv=None):
     p.add_argument('--output-dir', type=Path, default=REPORTS)
     p.add_argument('--scenario', default='basic', help='scenario name or JSON path')
     p.add_argument('--sample-id', action='append', help='select one or more public manifest IDs from the scenario')
+    p.add_argument('--require-ocr-only', action='store_true', help='abort before inference unless all observed GPU compute processes belong to PaddleOCR')
     p.add_argument('--sample-interval', type=float, default=0.5)
     args = p.parse_args(argv)
     if args.requests < 1 or args.warmup < 0 or args.timeout <= 0 or args.concurrency < 1:
@@ -241,15 +242,80 @@ def command(args):
     except (OSError, subprocess.TimeoutExpired):
         return None
 
+def runtime_inventory():
+    """Map active NVIDIA compute PIDs to container process lists; never infer from names alone."""
+    container_raw = command(['docker', 'ps', '--format',
+                             '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.State}}\t{{.Status}}'])
+    containers = []
+    pid_owners = {}
+    if container_raw is not None:
+        for line in container_raw.splitlines():
+            fields = line.split('\t', 4)
+            if len(fields) != 5:
+                continue
+            cid, name, image, state, status = fields
+            containers.append({'id': cid, 'name': name, 'image': image,
+                               'state': state, 'status': status})
+            top = command(['docker', 'top', name, '-eo', 'pid,comm'])
+            if top:
+                for proc_line in top.splitlines()[1:]:
+                    columns = proc_line.split(None, 1)
+                    if len(columns) == 2 and columns[0].isdigit():
+                        pid_owners[int(columns[0])] = {'container_id': cid,
+                                                       'container_name': name,
+                                                       'process': columns[1]}
+    raw_gpu = command(['nvidia-smi', '--query-compute-apps=pid,process_name,used_memory',
+                       '--format=csv,noheader,nounits'])
+    gpu_processes = []
+    gpu_query_ok = raw_gpu is not None
+    if raw_gpu:
+        for line in raw_gpu.splitlines():
+            columns = [part.strip() for part in line.split(',', 2)]
+            if len(columns) != 3 or not columns[0].isdigit():
+                gpu_query_ok = False
+                continue
+            pid = int(columns[0])
+            owner = pid_owners.get(pid)
+            gpu_processes.append({'pid': pid, 'process_name': columns[1],
+                                  'gpu_memory_mib': columns[2],
+                                  'owner': owner or {'type': 'unmapped_host_or_container_process'}})
+    ocr_pids = {pid for pid, owner in pid_owners.items()
+                if owner['container_name'] == 'paddleocr-gb10'}
+    non_ocr = [proc for proc in gpu_processes if proc['pid'] not in ocr_pids]
+    if not gpu_query_ok or container_raw is None:
+        mode, reason = 'UNKNOWN_SHARED', 'Could not enumerate Docker containers or NVIDIA compute processes'
+    elif not non_ocr:
+        mode, reason = 'OCR_ONLY', 'All observed GPU compute processes belong to the PaddleOCR container, or no compute process was present'
+    else:
+        util_raw = command(['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'])
+        utils = []
+        if util_raw:
+            try:
+                utils = [float(value.strip().split()[0]) for value in util_raw.splitlines()]
+            except ValueError:
+                utils = []
+        if utils and all(value == 0 for value in utils):
+            mode, reason = 'SHARED_IDLE', 'Non-OCR GPU compute processes exist; all GPUs reported zero utilization at the preflight snapshot'
+        else:
+            mode, reason = 'UNKNOWN_SHARED', 'Non-OCR GPU compute processes exist and were not verified idle'
+    return {'run_mode': mode, 'run_mode_reason': reason,
+            'docker_inventory_available': container_raw is not None,
+            'gpu_process_query_available': gpu_query_ok,
+            'containers': containers, 'gpu_compute_processes': gpu_processes,
+            'unmapped_gpu_processes': non_ocr,
+            'gpu_utilization_snapshot_pct': utils if non_ocr and 'utils' in locals() else None,
+            'pid_mapping_method': 'nvidia-smi compute PIDs matched against docker top host PIDs'}
+
 def environment(args, samples):
+    ocr_state = command(['docker', 'inspect', '--format', '{{.State.Status}}', 'paddleocr-gb10'])
+    ocr_health = command(['docker', 'inspect', '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}', 'paddleocr-gb10'])
     image = command(['docker', 'inspect', '--format', '{{.Image}}', 'paddleocr-gb10'])
     digests = command(['docker', 'image', 'inspect', '--format', '{{json .RepoDigests}}', image]) if image else None
     packages = command(['docker', 'exec', 'paddleocr-gb10', 'python', '-c',
                         "import importlib.metadata as m,json; print(json.dumps({x:m.version(x) for x in ('paddlepaddle-gpu','paddleocr','paddlex')}))"])
     gpu = command(['nvidia-smi', '--query-gpu=name,driver_version', '--format=csv,noheader'])
     cuda = command(['nvidia-smi'])
-    containers = command(['docker', 'ps', '--format', '{{.Names}} {{.Status}}'])
-    co_resident = containers.splitlines() if containers else None
+    inventory = runtime_inventory()
     source_files = [Path(__file__), Path(monitor.__file__), DATASET / 'manifest.json']
     source_hashes = {str(p.relative_to(ROOT)): sha(p) for p in source_files}
     git_dirty = command(['git', 'status', '--porcelain=v1', '-uall'])
@@ -259,10 +325,12 @@ def environment(args, samples):
             'docker_image_id': image, 'docker_repo_digests': json.loads(digests) if digests else None,
             'git_commit': command(['git', 'rev-parse', 'HEAD']), 'api_url': args.api_url,
             'git_worktree_dirty': bool(git_dirty), 'benchmark_source_sha256': source_hashes,
-            'co_resident_containers': co_resident,
-            'coexistence_note': ('Qwen-related containers may be present; generation activity and cache state were not measured. This is not a verified OCR-only baseline.'
-                                 if co_resident and any('vllm' in name.lower() or 'qwen' in name.lower() for name in co_resident)
-                                 else 'Other model activity was not independently verified.'),
+            **inventory,
+            'paddleocr_container_state': ocr_state,
+            'paddleocr_container_health': ocr_health,
+            'coexistence_note': ('No non-OCR GPU compute PID was observed at preflight.'
+                                 if inventory['run_mode'] == 'OCR_ONLY' else
+                                 'GPU process ownership/activity is shared or unknown; do not describe this run as an OCR-only baseline.'),
             'parameters': {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
             'dataset_sha256': {s['id']: s['sha256'] for s in samples},
             'dataset_samples': [{key: s.get(key) for key in ('id', 'file_type', 'width', 'height',
@@ -354,7 +422,14 @@ def execute(args, request_fn=one_request, sampler=monitor.sample):
     try:
         initial = sampler()
         reason = monitor.protection_reason(initial, initial=True)
-        if reason:
+        if args.require_ocr_only and (env.get('run_mode') != 'OCR_ONLY' or
+                                      env.get('paddleocr_container_state') != 'running' or
+                                      env.get('paddleocr_container_health') != 'healthy'):
+            status, reason = 'not_run', (f"OCR_ONLY and healthy PaddleOCR preflight required; observed "
+                                         f"mode={env.get('run_mode')}, container="
+                                         f"{env.get('paddleocr_container_state')}/{env.get('paddleocr_container_health')}")
+            telemetry.samples.append(initial)
+        elif reason:
             status = 'memory_protection_aborted'
             telemetry.samples.append(initial)
         else:

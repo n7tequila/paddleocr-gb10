@@ -24,6 +24,42 @@ class FakeResponse:
         return self.body.read()
 
 class BenchmarkTests(unittest.TestCase):
+    def test_gpu_pid_inventory_classifies_by_pid_mapping_not_container_names(self):
+        docker_ps = 'ocr-id\tpaddleocr-gb10\tpaddle:latest\trunning\tUp (healthy)\nqwen-id\todd-worker\tother:latest\trunning\tUp'
+        def command(args):
+            if args[:3] == ['docker', 'ps', '--format']:
+                return docker_ps
+            if args[:2] == ['docker', 'top']:
+                return 'PID COMMAND\n123 paddlex' if args[2] == 'paddleocr-gb10' else 'PID COMMAND\n456 python'
+            if args[0] == 'nvidia-smi' and '--query-compute-apps' in args[1]:
+                return '123, paddlex, 6000'
+            if args[0] == 'nvidia-smi' and '--query-gpu=utilization.gpu' in args[1]:
+                return '0'
+            return None
+        with patch.object(benchmark, 'command', side_effect=command):
+            result = benchmark.runtime_inventory()
+        self.assertEqual(result['run_mode'], 'OCR_ONLY')
+        self.assertEqual(result['gpu_compute_processes'][0]['owner']['container_name'], 'paddleocr-gb10')
+        self.assertEqual(result['containers'][1]['name'], 'odd-worker')
+
+    def test_gpu_process_outside_ocr_is_shared_or_unknown(self):
+        docker_ps = 'ocr-id\tpaddleocr-gb10\tpaddle:latest\trunning\tUp (healthy)\nworker-id\tanything\tmodel:latest\trunning\tUp'
+        def inventory(util):
+            def command(args):
+                if args[:3] == ['docker', 'ps', '--format']:
+                    return docker_ps
+                if args[:2] == ['docker', 'top']:
+                    return 'PID COMMAND\n123 paddlex' if args[2] == 'paddleocr-gb10' else 'PID COMMAND\n456 python'
+                if args[0] == 'nvidia-smi' and '--query-compute-apps' in args[1]:
+                    return '456, python, 4000'
+                if args[0] == 'nvidia-smi' and '--query-gpu=utilization.gpu' in args[1]:
+                    return util
+                return None
+            with patch.object(benchmark, 'command', side_effect=command):
+                return benchmark.runtime_inventory()
+        self.assertEqual(inventory('0')['run_mode'], 'SHARED_IDLE')
+        self.assertEqual(inventory('1')['run_mode'], 'UNKNOWN_SHARED')
+
     def test_arguments_and_guard(self):
         args = benchmark.parse_args(['--requests', '2', '--warmup', '0'])
         self.assertEqual((args.requests, args.concurrency, args.api_url), (2, 1, 'http://127.0.0.1:8080'))
