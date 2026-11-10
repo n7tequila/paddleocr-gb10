@@ -31,6 +31,7 @@ __pycache__/
 
 # Docker local build and results
 docker/.build/
+docker/model-cache/
 docker/api-smoke-result.json
 docker/*test*.json
 docker/*result*.json
@@ -45,6 +46,16 @@ docker/*.tar.gz
 *~
 *.secret
 *.token
+*.p12
+*.pfx
+*.credentials
+credentials.json
+secrets.json
+.aws/
+.netrc
+.npmrc
+.pypirc
+.docker/config.json
 *.env
 *.env.*
 !docker/.env.example

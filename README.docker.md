@@ -6,19 +6,23 @@ The image `paddleocr-gb10:0.2.0` passed Docker GPU validation on GB10. Official 
 
 - [English installation, prerequisites and limitations](docs/docker-v0.2.0.md)
 - [中文安装说明](README.docker.zh-CN.md)
-- [Host Serving validation](docs/serving-validation-2026-11-10.md)
+- [Host and Docker Serving validation](docs/serving-validation-2026-11-10.md)
 - [Docker release acceptance checklist](docs/release-0.2.0.md)
 
+## Image and deployment
+
+The intended GHCR image is `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`. As of 10 Nov 2026 its anonymous token request returned HTTP 401 and its Package page returned HTTP 404, so public pull and remote `linux/arm64` architecture remain unverified. Once public access is enabled:
+
 ```bash
-cd /data/llm-docker/paddleocr-gb10
-bash docker/preflight.sh
-bash docker/build-image.sh
-bash docker/check-image.sh
+docker pull --platform linux/arm64 ghcr.io/n7tequila/paddleocr-gb10:0.2.0
 cp docker/.env.example docker/.env
-# Edit the PADDLEX_CACHE absolute path in docker/.env before launch.
 docker compose --env-file docker/.env -f docker/compose.yaml up -d
 bash docker/check-api.sh /path/to/test-image.png
 ```
+
+The cache defaults to persistent `docker/model-cache` relative to the Compose file; set `PADDLEX_CACHE` in `docker/.env` to your own absolute path when using an existing cache. The model weights are not in the image and official tooling may download them on first use. NVIDIA Container Toolkit is required. The service uses GPU access and binds `127.0.0.1:8004` by default.
+
+For the already validated local image while GHCR is unavailable, set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` in `docker/.env`. To build locally on GB10 from the verified Wheel, run `bash docker/preflight.sh`, `bash docker/build-image.sh`, then `bash docker/check-image.sh`; see [full build steps](docs/docker-v0.2.0.md). The build helper refuses to overwrite an existing image unless explicitly requested.
 
 **Important:** On GB10 with Qwen3.8 already using ~93GiB unified memory, run one OCR process, avoid concurrent workloads until tested and observe system free RAM. Do not shut down or modify Qwen.
 

@@ -1,7 +1,8 @@
 name: paddleocr-gb10
 services:
   paddleocr:
-    image: ${PADDLEOCR_IMAGE:-paddleocr-gb10:0.2.0}
+    image: ${PADDLEOCR_IMAGE:-ghcr.io/n7tequila/paddleocr-gb10:0.2.0}
+    platform: linux/arm64
     container_name: paddleocr-gb10
     restart: unless-stopped
     gpus: all
@@ -17,6 +18,6 @@ services:
       PADDLEX_HOME: /root/.paddlex
       CUDA_VISIBLE_DEVICES: '0'
     volumes:
-      - '${PADDLEX_CACHE:?Set PADDLEX_CACHE in docker/.env}:/root/.paddlex'
+      - '${PADDLEX_CACHE:-./model-cache}:/root/.paddlex'
     # Deliberately no memory hard limit: GB10 uses unified CPU/GPU RAM.
     # Monitor MemAvailable and memory PSI before deploying next to a busy LLM.

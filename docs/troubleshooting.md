@@ -134,6 +134,18 @@ The GB10 Docker image `paddleocr-gb10:0.2.0` was built using the local PaddlePad
 
 The `--no-deps` Wheel install prevents pip from replacing the custom ARM64 GPU build, but also leaves its dependencies unresolved. During Docker preparation, `pip check` exposed missing runtime dependencies. The fix is to install the Wheel's compatible protobuf, httpx and CUDA package versions explicitly, retaining NumPy 2.3.5 and PaddleOCR/PaddleX 3.7.0/3.7.2. The Dockerfile checks `google.protobuf.internal.builder`, runs `pip check`, then imports CUDA-enabled Paddle. Avoid a general `pip install --upgrade` here: it previously raised NumPy beyond PaddleX's `<2.4` bound.
 
+### Missing packages after `--no-deps`
+
+The local PaddlePaddle GPU Wheel must be installed with `--no-deps` so pip does not replace it, but this also skips protobuf and httpx. The verified Docker image uses `protobuf==7.36.1` and `httpx==0.28.1`. CUDA runtime packages must also be installed explicitly: `cuda-python==13.0.3`, `cuda-toolkit==13.0.2` with the required CUDA components, `nvidia-cublas==13.1.1.3`, `nvidia-cudnn-cu13==9.20.0.48`, `nvidia-cusparselt-cu13==0.8.1`, and `nvidia-nccl-cu13==2.31.2`. See `docker/requirements-verified.txt` for the other exact packages captured from the validated image. Run `python -m pip check` after the cuSPARSELt metadata repair.
+
+### Temporary Docker build context omitted a helper
+
+The build helper uses a temporary context containing only approved inputs, not the whole repository. An earlier context omitted an auxiliary Python script referenced by `COPY`, causing a missing build source. `docker/build-image.sh` now copies `fix-cusparselt-wheel-tag.py`, `requirements-verified.txt`, the entrypoint and Dockerfile, verifies required files before `docker build`, and includes only the SHA256-checked Wheel. Check the first `COPY` error and the printed context file list if this recurs. The context packaging change was not verified by a fresh image rebuild.
+
+### SentencePiece generated Protobuf code mismatch
+
+During Docker dependency repair, SentencePiece's generated Protobuf code and the selected Protobuf runtime crossed incompatible major versions. A version change without checking the complete environment can make PaddleX startup fail even if pip resolves successfully. The validated image contains `sentencepiece==0.2.3` with `protobuf==7.36.1`; these exact versions are now constrained in `docker/requirements-verified.txt`. Preserve the pair, then check `python -m pip check` and an actual official Serving startup. The original exception text was not retained in this repository, so no specific stack trace is asserted here; a rebuild using the new constraints remains to be tested.
+
 The existing image then passed Docker GPU validation (compute capability 12.1). Official PaddleX Serving started; its `/layout-parsing` endpoint returned HTTP 200 for a real handwritten essay in 18.59 seconds. The validated image's `pip freeze` was captured as `docker/requirements-verified.txt`. This constraints file and updated build context packaging have **not yet been tested by a fresh build**. If a rebuild fails, keep the first pip or Docker error and compare it with the package versions in that file before changing any pinned CUDA dependency.
 
 ## Open work / not yet validated

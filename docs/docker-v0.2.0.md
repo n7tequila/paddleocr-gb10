@@ -2,6 +2,8 @@
 
 **Status:** The existing `paddleocr-gb10:0.2.0` image passed Docker GPU validation on GB10. Official PaddleX Serving started and `/layout-parsing` returned HTTP 200 for a real handwritten essay in 18.59 seconds. The new package constraints were captured from that image; a fresh rebuild of this updated recipe remains to be tested.
 
+**Distribution status (10 Nov 2026):** [v0.2.0 Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0), its [Wheel](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/paddlepaddle_gpu-3.5.0.dev20261109%2B6c839e963ed-cp312-cp312-linux_aarch64.whl), and [SHA256SUMS](https://github.com/n7tequila/paddleocr-gb10/releases/download/v0.2.0/SHA256SUMS) are public. GHCR anonymous pull is not available: token request returned HTTP 401 and the Package page returned HTTP 404. Thus the remote image's existence, visibility and architecture are not confirmed. The Compose default points to the intended GHCR tag for use after publication; set `PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0` for the verified local image meanwhile.
+
 This project does **not** implement another API or change the official PaddleX request/response. The container entrypoint is simply `paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 0.0.0.0 --port 8080`. Upstream docs: https://paddlepaddle.github.io/PaddleX/3.7/en/pipeline_usage/tutorials/ocr_pipelines/PaddleOCR-VL.html
 
 ## Validated configuration
@@ -18,7 +20,7 @@ This project does **not** implement another API or change the official PaddleX r
 Use a checkout of this repository **on the GB10 host** (not macOS). The build script obtains the GPU wheel from the already-working host environment and verifies its checksum:
 
 ```bash
-cd /data/llm-docker/paddleocr-gb10
+# From this repository's root on GB10:
 bash docker/preflight.sh
 bash docker/build-image.sh
 bash docker/check-image.sh
@@ -34,7 +36,9 @@ Configure Compose:
 
 ```bash
 cp docker/.env.example docker/.env
-# Set PADDLEX_CACHE to your actual absolute host path, e.g. /home/tequila/.paddlex
+# Optionally set PADDLEX_CACHE to your own absolute existing cache path.
+# The default is the persistent docker/model-cache directory.
+# For the local image, set PADDLEOCR_IMAGE=paddleocr-gb10:0.2.0 in docker/.env.
 # Confirm the host's old PaddleX Serving on port 8004 is stopped (Ctrl+C).
 docker compose --env-file docker/.env -f docker/compose.yaml config
 docker compose --env-file docker/.env -f docker/compose.yaml up -d
@@ -44,10 +48,10 @@ docker compose --env-file docker/.env -f docker/compose.yaml logs -f --tail=80
 Test from another shell using one known non-sensitive local image:
 
 ```bash
-bash docker/check-api.sh /home/tequila/.paddlex/predict_input/paddleocr_vl_demo.png
+bash docker/check-api.sh /path/to/image.png
 ```
 
-Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity in env variable resolution. On a future install that uses another user, change `PADDLEX_CACHE` and ensure downloaded model directories exist. `paddlex --install serving` is run *at Docker build time*, not on each container startup.
+Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity in env variable resolution. `PADDLEX_CACHE` may be a user-selected absolute directory or the default `docker/model-cache`, where official tooling can download model weights. `paddlex --install serving` is run *at Docker build time*, not on each container startup. Docker Compose now selects `linux/arm64` and the intended GHCR image by default; this changed startup path needs a live pull and service check once GHCR is public.
 
 ## Limitations and decisions
 
@@ -56,7 +60,7 @@ Run Compose commands with `--env-file docker/.env` as shown to avoid ambiguity i
 - `gpus: all` requires NVIDIA Container Toolkit / compatible Docker Compose.
 - The image uses `nvidia/cuda:13.0.2-cudnn-runtime-ubuntu24.04`. The existing image passed GB10 GPU validation; the new dependency constraints need a fresh build test. The base image is pinned by tag, not digest, and APT packages may change upstream.
 - The original host and Docker build needed the `nvidia-cusparselt-cu13==0.8.1` metadata workaround (`manylinux2014_sbsa` vs `_aarch64`). The included script changes installed WHEEL metadata and RECORD only; binary libraries stay untouched.
-- The PaddlePaddle GPU wheel is **not embedded in the Git repository**; it is copied from the locally verified host build into the isolated build context. Other people must build the wheel themselves or obtain it separately from a trusted release.
+- The PaddlePaddle GPU Wheel is **not embedded in Git or the model cache**. It is available as the v0.2.0 Release attachment linked above, or can be built locally. The build helper's default Wheel location is host-specific; set `PADDLE_WHEEL_DIR` to the directory containing your verified Wheel.
 - Do not run multiple workers or parallel requests by default. Container memory limits are intentionally unset for GB10 unified RAM; monitor real `MemAvailable` and PSI under dual-model load. No automatic OOM safeguard is implemented here.
 - The startup command exposes original PaddleX endpoints including `POST /layout-parsing`; it does not supply a custom `/v1/ocr/parse` endpoint.
 

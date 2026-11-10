@@ -9,6 +9,19 @@ paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 0.0.0.0 --port
 
 Docker 映射为宿主机 `http://127.0.0.1:8004/layout-parsing`，请求与响应由官方 PaddleX 提供。今后的 `edu-ocr` 属于独立项目，不并入这个基础镜像。
 
+## 镜像状态与快速启动
+
+预期公开地址为 `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`。截至 2026-11-10，匿名 GHCR 令牌请求返回 HTTP 401、Package 页面返回 HTTP 404，**尚不能公开拉取，也无法核实远端 `linux/arm64` 清单**。公开后可执行：
+
+```bash
+docker pull --platform linux/arm64 ghcr.io/n7tequila/paddleocr-gb10:0.2.0
+cp docker/.env.example docker/.env
+docker compose --env-file docker/.env -f docker/compose.yaml up -d
+bash docker/check-api.sh /path/to/image.png
+```
+
+需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8004`。GHCR 不可拉取期间，把 `docker/.env` 的 `PADDLEOCR_IMAGE` 改为已验证的本地 `paddleocr-gb10:0.2.0`。
+
 ## 国内下载源（默认注释，不影响海外用户）
 
 默认使用 CUDA 基础镜像中预配置的 Ubuntu APT 源和 PyPI 源。国内用户可打开 `docker/build-image.sh`，将这两行前面的 `#` 去掉：
@@ -30,10 +43,9 @@ bash docker/build-image.sh
 
 ## Spark 上的部署步骤
 
-确认你的源码仓库已经在 Spark 上。如果项目路径不同，先进入实际 Git 仓库目录：
+如需从本地 Wheel 重建镜像，进入实际 Git 仓库目录：
 
 ```bash
-cd /data/llm-docker/paddleocr-gb10
 bash docker/preflight.sh
 bash docker/build-image.sh
 bash docker/check-image.sh
@@ -45,7 +57,8 @@ bash docker/check-image.sh
 
 ```bash
 cp docker/.env.example docker/.env
-# 根据机器真实用户名与模型目录修改 PADDLEX_CACHE（绝对路径）
+# 使用本地构建镜像时，将 docker/.env 的 PADDLEOCR_IMAGE 改成 paddleocr-gb10:0.2.0
+# 可按需将 PADDLEX_CACHE 改为自己的绝对模型缓存目录
 # 先 Ctrl+C 关闭原先宿主机上的 official-serving.sh start，释放 8004 端口。
 docker compose --env-file docker/.env -f docker/compose.yaml config
 docker compose --env-file docker/.env -f docker/compose.yaml up -d
@@ -55,7 +68,7 @@ docker compose --env-file docker/.env -f docker/compose.yaml logs -f --tail=80
 在另一个终端发起官方接口测试：
 
 ```bash
-bash docker/check-api.sh /home/tequila/.paddlex/predict_input/paddleocr_vl_demo.png
+bash docker/check-api.sh /path/to/image.png
 ```
 
 输出应包含 `SUCCESS: official API`、`errorCode=0`、`markdown` 和 `prunedResult`。现有 `paddleocr-gb10:0.2.0` 镜像已经通过 Docker GPU 验证；官方 Serving 对真实手写作文返回 HTTP 200，耗时 18.59 秒。新增的依赖约束文件取自该镜像，但整理后的源码尚需重新构建验证。

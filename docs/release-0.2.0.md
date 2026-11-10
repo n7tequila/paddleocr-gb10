@@ -7,9 +7,11 @@ The existing image passed the following checks on GB10. Repository cleanup and e
 - [x] Official PaddleX Serving started inside Docker with PaddleOCR-VL-1.6.
 - [x] Official `/layout-parsing` returned HTTP 200 for a real handwritten essay in 18.59 seconds.
 - [x] Python package versions captured from the validated image in `docker/requirements-verified.txt`.
+- [x] GitHub Release `v0.2.0` is public with the GPU Wheel and matching `SHA256SUMS`.
+- [ ] GHCR anonymous pull succeeds and the remote manifest confirms `linux/arm64` (10 Nov: anonymous token HTTP 401, Package page HTTP 404).
 - [ ] Rebuild the updated source recipe with its exact constraints and repeat Docker GPU/API checks.
 - [ ] Record memory metrics during repeated requests while Qwen3.8 stays online.
 - [ ] Validate **simultaneous** Qwen inference + OCR before declaring production coexistence.
 - [ ] Record the CUDA base image digest and RAM metrics of a successful rebuild.
 
-No GitHub Container Registry image is claimed or published by this package. Git push, tag creation and Release publication require a separate explicit instruction.
+The GitHub Release is already published. The GHCR image is an intended address, but public accessibility and platform remain unverified. Git push, tag changes and Release edits require a separate explicit instruction.
