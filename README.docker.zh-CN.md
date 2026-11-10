@@ -9,6 +9,8 @@ paddlex --serve --pipeline PaddleOCR-VL-1.6 --device gpu:0 --host 0.0.0.0 --port
 
 Docker 映射为宿主机 `http://127.0.0.1:8080/layout-parsing`，请求与响应由官方 PaddleX 提供。今后的 `edu-ocr` 属于独立项目，不并入这个基础镜像。
 
+分层自动化检查、资源门槛和报告说明见[中文测试指南](docs/testing.zh-CN.md)。
+
 ## 镜像状态与快速启动
 
 已发布镜像地址为 `ghcr.io/n7tequila/paddleocr-gb10:0.2.0`。2026-11-10 匿名令牌与清单请求均返回 HTTP 200，OCI 索引列出 `linux/arm64`。尚未完整拉取远端镜像或重新做 GPU 测试。参见 [v0.2.0 Release](https://github.com/n7tequila/paddleocr-gb10/releases/tag/v0.2.0)。
@@ -21,6 +23,8 @@ bash docker/check-api.sh /path/to/image.png
 ```
 
 需要安装 NVIDIA Container Toolkit 并让 Docker 容器获得 GPU。直接拉取 GHCR 镜像不需要本地 Wheel 或构建上下文。模型权重不在镜像里，官方工具可在首次启动时下载；默认持久化目录为 Compose 文件旁的 `docker/model-cache`，也可在 `docker/.env` 中把 `PADDLEX_CACHE` 设成自己的绝对目录。默认仅监听 `127.0.0.1:8080`，可用 `PADDLEOCR_PUBLIC_PORT` 更改端口。本地构建为可选流程，届时将 `PADDLEOCR_IMAGE` 改为 `paddleocr-gb10:0.2.0`。
+
+Compose 每 30 秒在容器内部请求 PaddleX 官方 `GET /health`。`starting` 表示首次成功检查尚未完成；120 秒启动宽限期内的失败不计入重试次数。`healthy` 表示 `/health` 返回 HTTP 200；`unhealthy` 表示连续三次计入的检查失败。该检查不会执行 OCR 推理。用 `docker compose --env-file docker/.env -f docker/compose.yaml ps` 查看状态，另用 `/layout-parsing` 请求验证实际推理。
 
 ## 国内下载源（默认注释，不影响海外用户）
 

@@ -27,7 +27,7 @@ docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 padd
 bash docker/check-api.sh /path/to/image.png
 ```
 
-The default host address is `127.0.0.1:8080`; set `PADDLEOCR_PUBLIC_PORT` in `docker/.env` if it is busy. If an older `docker/.env` exists, set its `PADDLEOCR_IMAGE` to the GHCR tag. `PADDLEX_CACHE` defaults to persistent `docker/model-cache`, mapped to `/root/.paddlex`; model weights are downloaded on first start. Compose marks the container healthy after PaddleX starts listening on its internal port, with a 10-minute startup grace period for model loading. This TCP check does not validate OCR inference; use the `/layout-parsing` request below for that. This path pulls GHCR directly and requires no Wheel download or image build.
+The default host address is `127.0.0.1:8080`; set `PADDLEOCR_PUBLIC_PORT` in `docker/.env` if it is busy. If an older `docker/.env` exists, set its `PADDLEOCR_IMAGE` to the GHCR tag. `PADDLEX_CACHE` defaults to persistent `docker/model-cache`, mapped to `/root/.paddlex`; model weights are downloaded on first start. Compose uses PaddleX's official `GET /health`: `starting` means the first successful check has not completed, and failures during the 120-second startup grace period do not count; `healthy` means HTTP 200; `unhealthy` means three counted checks failed consecutively. The probe runs every 30 seconds with a 10-second Docker timeout and does not run OCR inference; use the `/layout-parsing` request below for that. This path pulls GHCR directly and requires no Wheel download or image build.
 
 ## Optional local build on FusionXpark
 

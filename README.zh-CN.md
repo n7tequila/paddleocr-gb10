@@ -2,6 +2,8 @@
 
 [English README](README.md) · [完整排障记录](docs/troubleshooting.md) · [构建说明](docs/reproduction.md) · [基准测试](docs/benchmarks.md)
 
+L1–L6 自动化测试见[中文测试指南](docs/testing.zh-CN.md)。先运行 `bash tests/run-tests.sh static`；GPU 和真实 OCR 推理层的资源要求见指南。
+
 这是在 **FusionXpark / NVIDIA GB10（ARM64、CUDA 13.0、SM 12.1）** 上实践 PaddlePaddle GPU 编译和 PaddleOCR-VL-1.6 推理的社区记录与复现工程。不是 NVIDIA/PaddlePaddle 官方发布项目。
 
 本项目使用 PaddleOCR 3.7.0、PaddleX 3.7.2 和 `paddle_dynamic` 推理引擎。容器直接启动 [PaddleX 官方 Serving](https://paddlepaddle.github.io/PaddleX/3.7/en/pipeline_usage/tutorials/ocr_pipelines/PaddleOCR-VL.html)，不另行实现 REST API，也不修改官方请求或响应协议。
@@ -58,7 +60,7 @@ curl --fail-with-body --connect-timeout 10 --max-time 300 \
   http://127.0.0.1:8080/layout-parsing
 ```
 
-启动后用 `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` 和同参数的 `ps` 查看状态。首次启动可能下载模型到持久化的 `/root/.paddlex` 缓存；以 `/layout-parsing` 成功响应确认就绪，不依赖未记录的健康检查端点。
+启动后用 `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` 和同参数的 `ps` 查看状态。首次启动可能下载模型到持久化的 `/root/.paddlex` 缓存；Compose 检查 PaddleX 官方 `GET /health`，再以 `/layout-parsing` 成功响应验证 OCR 推理。
 
 ## 社区构建 PaddlePaddle GPU Wheel
 

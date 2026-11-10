@@ -8,6 +8,7 @@
 **/logs
 **/wheels
 **/results
+**/reports
 **/.env
 **/*.safetensors
 **/*.pdparams

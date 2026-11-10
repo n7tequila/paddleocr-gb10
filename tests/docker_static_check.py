@@ -9,6 +9,13 @@ for p in (r/'docker').glob('*.py'):
     ast.parse(p.read_text(),filename=str(p))
 compose=(r/'docker/compose.yaml').read_text()
 assert 'gpus: all' in compose
+healthcheck=compose.split('    healthcheck:', 1)[1].split('    # Deliberately', 1)[0]
+assert 'urllib.request.urlopen' in healthcheck
+assert 'http://127.0.0.1:8080/health' in healthcheck
+assert 'response.status == 200' in healthcheck
+assert '/layout-parsing' not in healthcheck
+for setting in ('interval: 30s', 'timeout: 10s', 'retries: 3', 'start_period: 120s'):
+    assert setting in healthcheck, setting
 assert '127.0.0.1' in (r/'docker/.env.example').read_text()
 assert 'paddlex --serve' in (r/'docker/entrypoint.sh').read_text()
 assert 'FastAPI' not in (r/'docker/entrypoint.sh').read_text()

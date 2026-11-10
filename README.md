@@ -2,6 +2,8 @@
 
 [中文文档](README.zh-CN.md) · [Troubleshooting](docs/troubleshooting.md) · [Reproduction](docs/reproduction.md) · [Benchmarks](docs/benchmarks.md)
 
+Automated L1-L6 checks: [test guide](docs/testing.md). Start with `bash tests/run-tests.sh static`; see the guide before running GPU or OCR inference layers.
+
 **Community project; not affiliated with PaddlePaddle, NVIDIA, or the projects credited below.**
 
 Run a self-built `paddlepaddle-gpu` Python 3.12 wheel with PaddleOCR 3.7.0 / PaddleX 3.7.2 and PaddleOCR-VL-1.6 on a GB10 (`aarch64`, `sm_121`, CUDA 13.0). The first reported validation was performed on a FusionXpark in November 2026.
@@ -60,7 +62,7 @@ curl --fail-with-body --connect-timeout 10 --max-time 300 \
   http://127.0.0.1:8080/layout-parsing
 ```
 
-Check startup with `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` and `docker compose --env-file docker/.env -f docker/compose.yaml ps`. The first start may spend time downloading model weights into the mounted `/root/.paddlex` cache. Use a successful `/layout-parsing` request as the readiness check; this guide does not rely on an undocumented health endpoint.
+Check startup with `docker compose --env-file docker/.env -f docker/compose.yaml logs --tail=80 paddleocr` and `docker compose --env-file docker/.env -f docker/compose.yaml ps`. The first start may spend time downloading model weights into the mounted `/root/.paddlex` cache. Compose checks PaddleX's official `GET /health`; use a successful `/layout-parsing` request to validate OCR inference.
 
 ## Community PaddlePaddle GPU Wheel
 

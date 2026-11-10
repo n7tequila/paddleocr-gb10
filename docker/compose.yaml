@@ -20,11 +20,11 @@ services:
     volumes:
       - '${PADDLEX_CACHE:-./model-cache}:/root/.paddlex'
     healthcheck:
-      # Check PaddleX's listening port without running an OCR inference.
-      test: ["CMD", "python", "-c", "import os,socket; socket.create_connection(('127.0.0.1', int(os.environ.get('PADDLEOCR_PORT', '8080'))), timeout=3).close()"]
+      # PaddleX's official lightweight endpoint; no OCR inference is run.
+      test: ["CMD", "python", "-c", "import urllib.request; response = urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=5); assert response.status == 200; response.close()"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 10m
+      start_period: 120s
     # Deliberately no memory hard limit: GB10 uses unified CPU/GPU RAM.
     # Monitor MemAvailable and memory PSI before deploying next to a busy LLM.

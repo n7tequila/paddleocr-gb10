@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Shell syntax
-        run: |
-          for s in scripts/*.sh; do bash -n "$s"; done
-      - name: Python syntax and artifact checks
-        run: python3 tests/static_check.py
+      - name: Static checks
+        run: bash tests/run-tests.sh static
+      - name: Unit tests (no GPU or network)
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
